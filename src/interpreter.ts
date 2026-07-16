@@ -527,6 +527,67 @@ export class Interpreter {
       }
     }
 
+    // Special case: handle list method calls via Property (e.g., nums.contains 4)
+    // When callee is Property(nums, contains), treat it as a list method call
+    if (expr.callee.type === 'Property' && expr.callee.object.type === 'Identifier') {
+      const objName = expr.callee.object.name;
+      const methodName = expr.callee.property.toLowerCase();
+      const args = await Promise.all(expr.args.map(arg => this.evaluate(arg)));
+      // Look up the object (list or string)
+      try {
+        const obj = this.environment.get(objName);
+
+        // Handle array methods
+        if (Array.isArray(obj)) {
+          if (methodName === 'contains' && args.length === 1) {
+            const targetVal = args[0];
+            return obj.some(v => this.isEqual(v, targetVal));
+          }
+          if (methodName === 'indexof' && args.length === 1) {
+            const targetVal = args[0];
+            const idx = obj.findIndex(v => this.isEqual(v, targetVal));
+            return idx >= 0 ? idx : -1;
+          }
+          if (methodName === 'remove' && args.length === 1) {
+            const idx = this.toNumber(args[0]);
+            if (idx < 0 || idx >= obj.length) {
+              throw indexOutOfBounds({ line: 0, column: 0 } as any, idx, obj.length);
+            }
+            return obj.splice(idx, 1)[0];
+          }
+          if (methodName === 'slice' && args.length >= 1) {
+            const start = Math.floor(this.toNumber(args[0]));
+            const end = args.length > 1 ? Math.floor(this.toNumber(args[1])) : undefined;
+            return obj.slice(start, end);
+          }
+          if (methodName === 'sort') {
+            return [...obj].sort((a, b) => {
+              if (typeof a === 'number' && typeof b === 'number') return a - b;
+              return String(a).localeCompare(String(b));
+            });
+          }
+          if (methodName === 'reverse') {
+            return [...obj].reverse();
+          }
+        }
+
+        // Handle string methods
+        if (typeof obj === 'string') {
+          if (methodName === 'upper') return obj.toUpperCase();
+          if (methodName === 'lower') return obj.toLowerCase();
+          if (methodName === 'trim') return obj.trim();
+          if (methodName === 'length') return obj.length;
+          if (methodName === 'contains' && args.length === 1) return obj.includes(String(args[0]));
+          if (methodName === 'startswith' && args.length === 1) return obj.startsWith(String(args[0]));
+          if (methodName === 'endswith' && args.length === 1) return obj.endsWith(String(args[0]));
+          if (methodName === 'split' && args.length === 1) return obj.split(String(args[0]));
+          if (methodName === 'replace' && args.length === 2) return obj.replaceAll(String(args[0]), String(args[1]));
+        }
+      } catch (e) {
+        // If variable not found, fall through to normal handler
+      }
+    }
+
     const callee = await this.evaluate(expr.callee);
     const args = await Promise.all(expr.args.map(arg => this.evaluate(arg)));
 
@@ -577,6 +638,14 @@ export class Interpreter {
       // Handle array properties like .length
       if (expr.property === 'length') {
         return object.length;
+      }
+      // Handle list method calls via property access (e.g., list.pop)
+      if (expr.property === 'pop') {
+        const popped = object.pop();
+        return popped ?? null;
+      }
+      if (expr.property === 'contains') {
+        return false; // Should be handled differently
       }
       throw keyNotFound({ line: 0, column: 0 } as any, expr.property);
     }

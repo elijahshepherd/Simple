@@ -17,15 +17,16 @@ export class SimpleError extends Error {
   }
 
   toString(source?: string): string {
+    const col = Math.max(0, this.column - 1);
     let result = `Error at line ${this.line}, column ${this.column}: ${this.message}`;
     if (this.suggestion) {
       result += `\nSuggestion: ${this.suggestion}`;
     }
     if (source && this.sourceLine) {
-      const pointer = ' '.repeat(this.column - 1) + '^';
+      const pointer = ' '.repeat(col) + '^';
       result += `\n${this.sourceLine}\n${pointer}`;
     } else if (this.sourceLine) {
-      const pointer = ' '.repeat(this.column - 1) + '^';
+      const pointer = ' '.repeat(col) + '^';
       result += `\n${this.sourceLine}\n${pointer}`;
     }
     return result;
@@ -35,7 +36,8 @@ export class SimpleError extends Error {
 export function formatError(error: SimpleError, source?: string): string {
   const lines = source?.split('\n') || [];
   const sourceLine = lines[error.line - 1] || error.sourceLine;
-  const pointer = ' '.repeat(error.column - 1) + '^';
+  const col = Math.max(0, error.column - 1);
+  const pointer = ' '.repeat(col) + '^';
 
   let msg = `I ran into a problem at line ${error.line}, column ${error.column}:\n`;
   msg += `${error.message}\n`;

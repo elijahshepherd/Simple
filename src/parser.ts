@@ -320,10 +320,11 @@ export class Parser {
   // Check if a property name is a module method that can be called with space-separated args
   private isModuleCallStart(method: string): boolean {
     const moduleMethods = new Set(['int', 'float', 'choice', 'shuffle', 'bool',
-      'upper', 'lower', 'trim', 'split', 'join', 'replace', 'length', 'contains',
+      'upper', 'lower', 'trim', 'split', 'join', 'replace', 'contains',
       'startswith', 'endswith', 'substring',
       'abs', 'round', 'floor', 'ceil', 'sqrt', 'pow', 'min', 'max', 'clamp',
-      'random', 'pi', 'e']);
+      'random', 'pi', 'e', 'indexof', 'remove', 'slice', 'sort', 'reverse',
+      'pop', 'push']);
     return moduleMethods.has(method.toLowerCase());
   }
 
@@ -953,12 +954,13 @@ export class Parser {
       const listExpr: Expr = { type: 'Identifier', name: objToken.value };
 
       const stmt: any = { type: info.type };
-      info.params.forEach((param, i) => {
-        if (param === 'list') {
-          stmt[param] = listExpr;
-        } else {
-          stmt[param] = args[i] || listExpr;
-        }
+      // Filter out the 'list' param to get the arg-only params
+      const argParams = info.params.filter(p => p !== 'list');
+      // stmt.list = listExpr (the list)
+      stmt.list = listExpr;
+      // The remaining args map to argParams in order
+      argParams.forEach((param, i) => {
+        stmt[param] = args[i] || listExpr;
       });
       if (target) stmt.target = target;
       return stmt;
@@ -1256,9 +1258,14 @@ export class Parser {
     // List literal
     if (this.match(TokenType.LBRACKET)) {
       const elements: Expr[] = [];
+      // Consume newlines after the opening bracket
+      this.match(TokenType.NEWLINE);
       if (!this.check(TokenType.RBRACKET)) {
         do {
+          this.consumeNewline();
+          if (this.check(TokenType.RBRACKET)) break;
           elements.push(this.expression());
+          this.match(TokenType.NEWLINE); // Consume newline after element
         } while (this.match(TokenType.COMMA));
       }
       this.consume(TokenType.RBRACKET, ['"]"']);
@@ -1268,12 +1275,16 @@ export class Parser {
     // Dict literal
     if (this.match(TokenType.LBRACE)) {
       const entries: { key: string; value: Expr }[] = [];
+      this.match(TokenType.NEWLINE);
       if (!this.check(TokenType.RBRACE)) {
         do {
-          const keyToken = this.consume(TokenType.IDENTIFIER, ['key name']);
+          this.consumeNewline();
+          if (this.check(TokenType.RBRACE)) break;
+          const keyToken = this.consumeName(['key name']);
           this.consume(TokenType.COLON, ['":"']);
           const value = this.expression();
           entries.push({ key: keyToken.value, value });
+          this.match(TokenType.NEWLINE);
         } while (this.match(TokenType.COMMA));
       }
       this.consume(TokenType.RBRACE, ['"}"']);
