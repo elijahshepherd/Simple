@@ -48,9 +48,11 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          echo "content<<EOF" >> $GITHUB_OUTPUT
+          # Use a unique delimiter to avoid conflicts with content
+          DELIMITER="RELEASE_CONTENT_EOF_$(date +%s)"
+          echo "content<<$DELIMITER" >> $GITHUB_OUTPUT
           cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "$DELIMITER" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
