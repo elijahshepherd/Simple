@@ -5,10 +5,6 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to release (optional)'
-        required: false
 
 permissions:
   contents: write
@@ -33,33 +29,16 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Read 1.0.md version and changelog
-        id: read_version
-        run: |
-          VERSION=$(grep -i "version:" 1.0.md | head -n1 | cut -d':' -f2 | tr -d ' ')
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Get version from 1.0.md
-        id: version_file
-        run: |
-          VERSION=$(grep -i "version:" 1.0.md | head -n1 | awk '{print $NF}')
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
-      - name: Get version from tag
+      - name: Read version from 1.0.md
         id: get_version
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.inputs.tag }}" != "" ]; then
-            echo "VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            VERSION=$(date +'%Y.%m.%d')
-            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          VERSION=$(grep -i "^Version:" 1.0.md | head -n1 | cut -d':' -f2 | tr -d ' ')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Read 1.0.md changelog
+        id: read_changelog
+        run: |
+          cat 1.0.md >> $GITHUB_STEP_SUMMARY
 
       - name: Run basic test
         run: |
@@ -69,33 +48,10 @@ jobs:
       - name: Package with pkg
         run: |
           npm install -g pkg
-          pkg . --targets node18-win-x64,node18-linux-x64,node18-macos-x64 --out-path dist-binaries
+          pkg . --targets node18-win-x64 --out-path dist-binaries
 
       - name: List built binaries
         run: ls -la dist-binaries/
-
-      - name: Create Source Archive
-        run: |
-          mkdir -p release
-          cp -r examples dist release/
-          cp bin/simple.js README.md PLAN.md package.json package-lock.json tsconfig.json release/
-          cp -r src release/
-          cp .github release/ -R 2>/dev/null || true
-          cd release
-          cd ..
-          tar -czf simple-${{ steps.get_version.outputs.VERSION }}-source.tar.gz -C release .
-
-      - name: Upload Linux binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: simple-linux-x64
-          path: dist-binaries/simple-linux
-
-      - name: Upload macOS binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: simple-macos-x64
-          path: dist-binaries/simple-macos
 
       - name: Upload Windows binary
         uses: actions/upload-artifact@v4
@@ -103,62 +59,28 @@ jobs:
           name: simple-win-x64
           path: dist-binaries/simple.exe
 
-      - name: Upload source archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: simple-source
-          path: simple-${{ steps.get_version.outputs.VERSION }}-source.tar.gz
-
       - name: Create Linux release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref }}
-          name: 'Simple  v${{ steps.get_version.outputs.VERSION }}'
+          name: 'Simple v${{ steps.get_version.outputs.VERSION }}'
           draft: false
           prerelease: false
-          generate_release_notes: true
           files: |
-            dist-binaries/simple-linux
-            dist-binaries/simple-macos
             dist-binaries/simple.exe
-            simple-${{ steps.get_version.outputs.VERSION }}-source.tar.gz
-          body: |
-            # Simple  v${{ steps.get_version.outputs.VERSION }}
+        body: |
+          # Simple v${{ steps.get_version.outputs.VERSION }}
 
-            A beginner-friendly programming language with natural English syntax.
+          A beginner-friendly programming language with natural English syntax.
 
-            ## Download & Install
+          ## Download & Install
 
-            ### Windows
-            Download `simple.exe` and put it anywhere in your PATH. Double-click to launch!
+          ### Windows
+          Download `simple.exe` and put it anywhere in your PATH. Double-click to launch!
 
-            ### macOS / Linux
-            Download `simple-linux` or `simple-macos`, rename to `simple`, make executable (`chmod +x simple`), and put it in your PATH.
+          ## What's Included
+          
+          - Windows binary (no Node.js required!)
+          - Source archive with all examples
 
-            ## Quick Start
-
-            ```bash
-            # Run an example
-            ./simple run examples/hello.spml
-
-            # Create a new project
-            ./simple new myproject
-
-            # List examples
-            ./simple examples
-
-            # Show help
-            ./simple --help
-            ```
-
-            ## What's Included
-
-            - Windows, macOS, and Linux binaries (no Node.js required!)
-            - Source archive with all examples
-            - All 8 stdlib modules: console, files, folders, system, random, time, text, math
-            - 15+ working examples in `examples/`
-
-            ## Documentation
-
-            See README.md and PLAN.md in the source archive for full documentation.
+          See 1.0.md for full changelog.
