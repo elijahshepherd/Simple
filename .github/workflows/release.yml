@@ -86,6 +86,7 @@ jobs:
           name: ${{ steps.tag_name.outputs.TAG_NAME }}
           draft: false
           prerelease: false
+          generate_release_notes: false
           files: |
             dist-binaries/simple.exe
           body: |
