@@ -33,6 +33,20 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
+      - name: Read 1.0.md version and changelog
+        id: read_version
+        run: |
+          VERSION=$(grep -i "version:" 1.0.md | head -n1 | cut -d':' -f2 | tr -d ' ')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get version from 1.0.md
+        id: version_file
+        run: |
+          VERSION=$(grep -i "version:" 1.0.md | head -n1 | awk '{print $NF}')
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
       - name: Get version from tag
         id: get_version
         run: |
