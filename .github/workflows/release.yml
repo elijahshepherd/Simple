@@ -58,7 +58,7 @@ jobs:
       - name: Run basic test
         run: |
           echo 'say "Hello from Simple!"' > /tmp/test.spml
-          node bin/simple.js run /tmp/test.spml
+          node dist/index.js run /tmp/test.spml
 
       - name: Package Windows executable with pkg
         run: |
