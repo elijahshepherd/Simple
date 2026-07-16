@@ -48,11 +48,10 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use a unique delimiter to avoid conflicts with content
-          DELIMITER="RELEASE_CONTENT_EOF_$(date +%s)"
-          echo "content<<$DELIMITER" >> $GITHUB_OUTPUT
-          cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "$DELIMITER" >> $GITHUB_OUTPUT
+          # Read file content and escape for JSON
+          content=$(cat "${{ steps.find_version.outputs.VERSION_FILE }}")
+          # Use jq to properly escape for GitHub output
+          echo "content=$(echo "$content" | jq -Rs .)" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
@@ -89,8 +88,7 @@ jobs:
           generate_release_notes: false
           files: |
             dist-binaries/simple.exe
-          body: |
-            ${{ steps.read_version_file.outputs.content }}
+          body: ${{ steps.read_version_file.outputs.content }}
 
             ---
             **Download:** [simple.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag_name.outputs.TAG_NAME }}/simple.exe)
