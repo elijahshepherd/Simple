@@ -29,23 +29,36 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Read version from 1.0.md
-        id: get_version
+      - name: Find latest version file
+        id: find_version
         run: |
-          VERSION=$(grep -i "^Version:" 1.0.md | head -n1 | cut -d':' -f2 | tr -d ' ')
+          # Find the latest version file in docs/release/
+          VERSION_FILE=$(ls -t docs/release/*.md | head -n1)
+          echo "VERSION_FILE=$VERSION_FILE" >> $GITHUB_OUTPUT
+          
+          # Extract version from filename (e.g., docs/release/1.0.md -> 1.0)
+          VERSION=$(basename "$VERSION_FILE" .md)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Read 1.0.md changelog
-        id: read_changelog
+      - name: Read version file
+        id: read_version_file
         run: |
-          cat 1.0.md >> $GITHUB_STEP_SUMMARY
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Extract version number from content
+        id: extract_version
+        run: |
+          VERSION=$(grep -i "^Version:" "${{ steps.find_version.outputs.VERSION_FILE }}" | head -n1 | cut -d':' -f2 | tr -d ' ')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
           echo 'say "Hello from Simple!"' > /tmp/test.spml
           node bin/simple.js run /tmp/test.spml
 
-      - name: Package with pkg
+      - name: Package with pkg (Windows only)
         run: |
           npm install -g pkg
           pkg . --targets node18-win-x64 --out-path dist-binaries
@@ -59,28 +72,14 @@ jobs:
           name: simple-win-x64
           path: dist-binaries/simple.exe
 
-      - name: Create Linux release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref }}
-          name: 'Simple v${{ steps.get_version.outputs.VERSION }}'
+          name: 'Simple v${{ steps.extract_version.outputs.VERSION }}'
           draft: false
           prerelease: false
           files: |
             dist-binaries/simple.exe
-        body: |
-          # Simple v${{ steps.get_version.outputs.VERSION }}
-
-          A beginner-friendly programming language with natural English syntax.
-
-          ## Download & Install
-
-          ### Windows
-          Download `simple.exe` and put it anywhere in your PATH. Double-click to launch!
-
-          ## What's Included
-          
-          - Windows binary (no Node.js required!)
-          - Source archive with all examples
-
-          See 1.0.md for full changelog.
+          body: |
+            ${{ steps.read_version_file.outputs.content }}
