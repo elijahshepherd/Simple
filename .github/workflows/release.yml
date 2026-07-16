@@ -48,15 +48,12 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Generate a unique delimiter that won't appear in content
-          UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || date +%s%N | sha256sum | head -c 32)
-          DELIMITER="RELEASE_BOUNDARY_${UUID}"
+          # Use a delimiter that definitely won't appear in markdown content
+          DELIMITER="___SIMPLE_RELEASE_CONTENT_BOUNDARY_$(date +%s%N)___"
           
-          {
-            echo "content<<${DELIMITER}"
-            cat "${{ steps.find_version.outputs.VERSION_FILE }}"
-            echo "${DELIMITER}"
-          } >> $GITHUB_OUTPUT
+          echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
+          cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
+          echo "${DELIMITER}" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
