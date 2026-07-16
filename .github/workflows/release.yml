@@ -48,10 +48,17 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Read file content and escape for JSON
-          content=$(cat "${{ steps.find_version.outputs.VERSION_FILE }}")
-          # Use jq to properly escape for GitHub output
-          echo "content=$(echo "$content" | jq -Rs .)" >> $GITHUB_OUTPUT
+          # Use Node.js to read and escape content (more reliable than jq)
+          node -e "
+            const fs = require('fs');
+            const content = fs.readFileSync('${{ steps.find_version.outputs.VERSION_FILE }}', 'utf8');
+            // Escape for GitHub Actions multiline output
+            const escaped = content
+              .replace(/%/g, '%25')
+              .replace(/\n/g, '%0A')
+              .replace(/\r/g, '%0D');
+            console.log('content=' + escaped);
+          " >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
