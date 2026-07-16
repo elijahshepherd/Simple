@@ -48,8 +48,8 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use a delimiter that definitely won't appear in markdown content
-          DELIMITER="___SIMPLE_RELEASE_CONTENT_BOUNDARY_$(date +%s%N)___"
+          # Use a fixed delimiter that won't appear in markdown content
+          DELIMITER="SIMPLE_RELEASE_END_OF_CONTENT_MARKER_12345"
           
           echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
           cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
