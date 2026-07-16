@@ -1,0 +1,37 @@
+# Guess the Number - Simple 1.0 Example
+
+import random
+
+say "Guess the Number!"
+say "================="
+
+# Generate random number 1-100
+random.int 1 to 100 into secret
+remember attempts as 0
+remember maxAttempts as 7
+
+say "I'm thinking of a number between 1 and 100."
+say "You have " maxAttempts " attempts."
+say ""
+
+repeat while attempts is less than maxAttempts
+  remember remaining as maxAttempts minus attempts
+  say "Attempts left: " remaining
+  ask "Your guess: " into guess
+  
+  remember attempts as attempts plus 1
+  
+  if guess is secret
+    say green "Correct! You got it in " attempts " attempt(s)!"
+    exit 0
+  end
+  
+  if guess is less than secret
+    say yellow "Too low!"
+  otherwise
+    say yellow "Too high!"
+  end
+  say ""
+end
+
+say red "Game over! The number was " secret "."

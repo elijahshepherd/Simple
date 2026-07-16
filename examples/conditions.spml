@@ -1,0 +1,95 @@
+# Conditions - Simple 1.0 Example
+
+say "Conditions Demo"
+say "==============="
+
+# Basic if
+remember score as 85
+
+if score is greater than or equal to 90
+  say green "Grade: A"
+otherwise if score is greater than or equal to 80
+  say green "Grade: B"
+otherwise if score is greater than or equal to 70
+  say yellow "Grade: C"
+otherwise if score is greater than or equal to 60
+  say yellow "Grade: D"
+otherwise
+  say red "Grade: F"
+end
+
+# Multiple conditions
+remember age as 25
+remember hasLicense as true
+
+say ""
+say "Can drive?"
+if age is greater than or equal to 18 and hasLicense
+  say green "Yes!"
+otherwise
+  say red "No"
+end
+
+# String comparison
+remember name as "Alice"
+
+say ""
+say "Name check:"
+if name is "Alice"
+  say "Hello, Alice!"
+otherwise if name is "Bob"
+  say "Hello, Bob!"
+otherwise
+  say "Hello, stranger!"
+end
+
+# Truthy/falsy
+remember emptyList as []
+remember nonEmpty as [1, 2, 3]
+remember zero as 0
+remember nonzero as 42
+
+say ""
+say "Truthy/falsy:"
+if emptyList
+  say "emptyList is truthy"
+otherwise
+  say "emptyList is falsy"
+end
+
+if nonEmpty
+  say "nonEmpty is truthy"
+end
+
+if zero
+  say "zero is truthy"
+otherwise
+  say "zero is falsy"
+end
+
+if nonzero
+  say "nonzero is truthy"
+end
+
+# Nested conditions
+say ""
+say "Nested conditions:"
+remember x as 10
+remember y as 20
+
+if x is greater than 5
+  if y is greater than 15
+    say "x > 5 and y > 15"
+  otherwise
+    say "x > 5 but y <= 15"
+  end
+otherwise
+  say "x <= 5"
+end
+
+# Inline condition in expression
+remember a as 10
+remember b as 5
+remember max as (if a is greater than b then a otherwise b)
+say ""
+say "Max of " a " and " b " is " max

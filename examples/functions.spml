@@ -1,0 +1,91 @@
+# Functions - Simple 1.0 Example
+
+say "Functions Demo"
+say "=============="
+
+# Simple function
+function greet with name
+  return "Hello, " name "!"
+end
+
+say call greet with "World"
+say call greet with "Simple"
+say call greet with "Programmer"
+
+# Function with multiple parameters
+function add with a, b
+  return a plus b
+end
+
+function multiply with a, b
+  return a multiply b
+end
+
+say ""
+say "Math functions:"
+say "5 + 3 = " call add with 5, 3
+say "4 * 7 = " call multiply with 4, 7
+
+# Function with default-like behavior
+function power with base, exponent
+  if exponent is 0
+    return 1
+  end
+  remember result as 1
+  repeat exponent times
+    remember result as result multiply base
+  end
+  return result
+end
+
+say ""
+say "Power function:"
+say "2^3 = " call power with 2, 3
+say "5^2 = " call power with 5, 2
+say "10^0 = " call power with 10, 0
+
+# Recursive function (factorial)
+function factorial with n
+  if n is less than or equal to 1
+    return 1
+  end
+  return n multiply call factorial with n minus 1
+end
+
+say ""
+say "Factorial:"
+say "5! = " call factorial with 5
+say "4! = " call factorial with 4
+
+# Function returning multiple values via list
+function stats with numbers
+  if numbers.length is 0
+    return [0, 0, 0, 0]
+  end
+  remember sum as 0
+  remember min as numbers[0]
+  remember max as numbers[0]
+  remember i as 0
+  repeat while i is less than numbers.length
+    remember sum as sum plus numbers[i]
+    if numbers[i] is less than min
+      remember min as numbers[i]
+    end
+    if numbers[i] is greater than max
+      remember max as numbers[i]
+    end
+    remember i as i plus 1
+  end
+  remember avg as sum divided by numbers.length
+  return [sum, avg, min, max]
+end
+
+say ""
+say "Statistics:"
+remember data as [10, 20, 30, 40, 50]
+remember result as call stats with data
+say "Data: " data
+say "Sum: " result[0]
+say "Avg: " result[1]
+say "Min: " result[2]
+say "Max: " result[3]

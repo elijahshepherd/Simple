@@ -1,0 +1,45 @@
+# Write File - Simple 1.0 Example
+
+import files
+import folders
+
+say "Write File Demo"
+say "==============="
+
+# Create output folder
+folders.create "output"
+
+# Write a simple file
+files.write "output/hello.txt" into "Hello, Simple!\nThis file was created by a Simple program."
+say green "Created output/hello.txt"
+
+# Append to file
+files.append "output/hello.txt" into "\nAppended line 1\nAppended line 2"
+say green "Appended to output/hello.txt"
+
+# Read back to verify
+remember content as ""
+files.read "output/hello.txt" into content
+say ""
+say "File contents:"
+say content
+
+# Write multiple files
+remember poems as {
+  "roses": "Roses are red,\nViolets are blue,\nSimple is fun,\nAnd so are you!",
+  "haiku": "Code flows like water\nSimple makes it easy\nJoy in every line",
+  "limerick": "A coder named Simple one day\nWrote code in a natural way\nNo brackets or braces\nJust words in their places\nAnd bugs stayed far away"
+}
+
+remember names as poems.keys
+remember i as 0
+repeat while i is less than names.length
+  remember name as names[i]
+  remember filename as "output/" name ".txt"
+  files.write filename into poems[name]
+  say green "Created " filename
+  remember i as i plus 1
+end
+
+say ""
+say "All files created in output/ folder"

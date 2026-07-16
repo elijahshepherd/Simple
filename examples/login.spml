@@ -1,0 +1,27 @@
+# Login Prompt - Simple 1.0 Example
+
+say "Login System"
+say "============"
+
+remember correctUser as "admin"
+remember correctPass as "secret123"
+remember maxAttempts as 3
+remember attempts as 0
+
+repeat while attempts is less than maxAttempts
+  ask "Username: " into username
+  ask "Password: " into password
+  remember attempts as attempts plus 1
+
+  if username is correctUser and password is correctPass
+    say green "Login successful! Welcome, " username "!"
+    exit 0
+  end
+
+  if attempts is less than maxAttempts
+    say yellow "Invalid credentials. Attempts left: " (maxAttempts minus attempts)
+  end
+end
+
+say red "Too many failed attempts. Access denied."
+exit 1

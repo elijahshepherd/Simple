@@ -1,0 +1,38 @@
+# Counter - Simple 1.0 Example
+
+say "Counter Demo"
+say "============"
+
+# Simple counter
+remember count as 0
+say "Starting at " count
+
+repeat 5 times
+  remember count as count plus 1
+  say "Count: " count
+  wait 0.5 seconds
+end
+
+say ""
+say "Final count: " count
+
+# Countdown
+say ""
+say "Countdown from 10:"
+remember n as 10
+repeat while n is greater than 0
+  say n "..."
+  remember n as n minus 1
+  wait 0.3 seconds
+end
+say "Go!"
+
+# Counter with step
+say ""
+say "Counting by 2s to 10:"
+remember i as 0
+repeat while i is less than or equal to 10
+  say i
+  remember i as i plus 2
+  wait 0.2 seconds
+end

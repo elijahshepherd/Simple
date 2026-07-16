@@ -1,0 +1,78 @@
+# Lists - Simple 1.0 Example
+
+say "Lists Demo"
+say "=========="
+
+# Creating lists
+remember empty as []
+remember numbers as [1, 2, 3, 4, 5]
+remember strings as ["apple", "banana", "cherry"]
+remember mixed as [1, "hello", true, 3.14]
+
+say "Empty: " empty
+say "Numbers: " numbers
+say "Strings: " strings
+say "Mixed: " mixed
+
+# Accessing elements
+say ""
+say "Accessing elements:"
+say "First number: " numbers[0]
+say "Last string: " strings[strings.length minus 1]
+
+# Modifying lists
+say ""
+say "Modifying:"
+numbers.push 6
+say "After push 6: " numbers
+
+remember popped as numbers.pop
+say "Popped: " popped ", Remaining: " numbers
+
+# List operations
+say ""
+say "List operations:"
+remember nums as [3, 1, 4, 1, 5, 9, 2, 6]
+say "Original: " nums
+say "Length: " nums.length
+say "Contains 4: " nums.contains 4
+say "Contains 7: " nums.contains 7
+say "Index of 5: " nums.indexOf 5
+say "Index of 99: " nums.indexOf 99
+
+nums.remove 2
+say "After remove index 2: " nums
+
+remember slice as nums.slice 1 to 4
+say "Slice 1-4: " slice
+
+nums.sort
+say "Sorted: " nums
+
+nums.reverse
+say "Reversed: " nums
+
+# List of lists (matrix)
+say ""
+say "Matrix (list of lists):"
+remember matrix as [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9]
+]
+
+say "Row 0: " matrix[0]
+say "Row 1 col 2: " matrix[1][2]
+
+# Flatten
+remember flat as []
+remember r as 0
+repeat while r is less than matrix.length
+  remember c as 0
+  repeat while c is less than matrix[r].length
+    flat.push matrix[r][c]
+    remember c as c plus 1
+  end
+  remember r as r plus 1
+end
+say "Flattened: " flat

@@ -1,0 +1,45 @@
+{
+  "name": "simple",
+  "version": "1.0.0",
+  "description": "Simple 1.0 - Beginner-friendly programming language with natural English syntax",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "simple": "./bin/simple.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node bin/simple.js",
+    "test": "node bin/simple.js run examples/hello.spml",
+    "pkg:win": "pkg . --targets node18-win-x64 --output simple.exe",
+    "pkg:linux": "pkg . --targets node18-linux-x64 --output simple-linux",
+    "pkg:mac": "pkg . --targets node18-macos-x64 --output simple-macos",
+    "pkg:all": "npm run pkg:win && npm run pkg:linux && npm run pkg:mac",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "simple",
+    "language",
+    "beginner",
+    "english",
+    "education"
+  ],
+  "author": "Elijah Shepherd",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "pkg": "^5.8.1",
+    "typescript": "^5.3.0"
+  },
+  "pkg": {
+    "assets": [
+      "examples/**/*"
+    ],
+    "targets": [
+      "node18-win-x64",
+      "node18-linux-x64",
+      "node18-macos-x64"
+    ],
+    "outputPath": "dist/bin"
+  }
+}

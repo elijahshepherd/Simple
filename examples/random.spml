@@ -1,0 +1,39 @@
+# Random Number Generator - Simple 1.0 Example
+
+import random
+
+say "Random Number Generator"
+say "======================="
+
+say "Random integer (1-100): " random.int 1 to 100
+say "Random float (0.0-1.0): " random.float 0.0 to 1.0
+say "Random boolean: " random.bool
+
+remember fruits as ["apple", "banana", "cherry", "date", "elderberry"]
+say "Random choice from list: " random.choice from fruits
+
+say ""
+say "Shuffled list: " random.shuffle fruits
+
+remember numbers as [10, 20, 30, 40, 50]
+say "Random from numbers: " random.choice from numbers
+
+# Dice roll simulation
+say ""
+say "Rolling 2 dice..."
+remember die1 as random.int 1 to 6
+remember die2 as random.int 1 to 6
+say "Die 1: " die1
+say "Die 2: " die2
+say "Total: " (die1 plus die2)
+
+# Random password generator
+say ""
+say "Generating 8-char password..."
+remember chars as "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%"
+remember password as ""
+repeat 8 times
+  remember idx as random.int 0 to (chars.length minus 1)
+  remember password as password plus chars[idx]
+end
+say "Password: " password

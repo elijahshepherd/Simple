@@ -1,0 +1,116 @@
+# Todo List - Simple 1.0 Example
+
+import files
+import text
+
+say "Todo List"
+say "========="
+
+remember todoFile as "todos.json"
+remember todos as []
+
+# Load existing todos
+if files.exists todoFile
+  remember content as ""
+  files.read todoFile into content
+  if content is not ""
+    remember todos as text.parseJson content
+    say green "Loaded " todos.length " todos"
+  end
+end
+
+function saveTodos
+  remember json as text.toJson todos
+  files.write todoFile into json
+end
+
+function showTodos
+  say ""
+  say "Your Todos:"
+  say "-----------"
+  if todos.length is 0
+    say "  (empty)"
+  otherwise
+    remember i as 0
+    repeat while i is less than todos.length
+      remember t as todos[i]
+      remember status as " "
+      if t.done
+        remember status as "x"
+      end
+      say "  " (i plus 1) ". [" status "] " t.text
+      remember i as i plus 1
+    end
+  end
+end
+
+function addTodo with text
+  remember todo as { "text": text, "done": false }
+  todos.push todo
+  call saveTodos
+  say green "Added: " text
+end
+
+function toggleTodo with index
+  if index is greater than or equal to 0 and index is less than todos.length
+    todos[index].done = not todos[index].done
+    call saveTodos
+    say green "Toggled todo " (index plus 1)
+  otherwise
+    say red "Invalid index"
+  end
+end
+
+function deleteTodo with index
+  if index is greater than or equal to 0 and index is less than todos.length
+    remember removed as todos.removeAt index
+    call saveTodos
+    say green "Deleted: " removed.text
+  otherwise
+    say red "Invalid index"
+  end
+end
+
+# Main loop
+showTodos
+say ""
+say "Commands: add <text>, toggle <num>, delete <num>, quit"
+
+repeat while true
+  ask "> " into cmd
+  remember parts as text.split cmd by " "
+  remember action as parts[0]
+
+  if action is "add"
+    if parts.length is greater than 1
+      remember text as text.join parts[1:] by " "
+      call addTodo with text
+    otherwise
+      say red "Usage: add <text>"
+    end
+  otherwise if action is "toggle"
+    if parts.length is greater than 1
+      remember idx as text.toNumber parts[1] minus 1
+      call toggleTodo with idx
+    otherwise
+      say red "Usage: toggle <num>"
+    end
+  otherwise if action is "delete"
+    if parts.length is greater than 1
+      remember idx as text.toNumber parts[1] minus 1
+      call deleteTodo with idx
+    otherwise
+      say red "Usage: delete <num>"
+    end
+  otherwise if action is "quit" or action is "exit"
+    say "Goodbye!"
+    break
+  otherwise if action is "list" or action is "show"
+    call showTodos
+  otherwise
+    say "Unknown command. Commands: add, toggle, delete, list, quit"
+  end
+
+  call showTodos
+  say ""
+end

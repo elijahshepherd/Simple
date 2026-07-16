@@ -1,0 +1,72 @@
+# Calculator - Simple 1.0 Example
+
+say "Simple Calculator"
+say "================="
+
+function showMenu()
+  say ""
+  say "Operations:"
+  say "  1. Add (+)"
+  say "  2. Subtract (-)"
+  say "  3. Multiply (*)"
+  say "  4. Divide (/)"
+  say "  5. Modulo (%)"
+  say "  6. Exit"
+end
+
+function getNumber(prompt)
+  ask prompt into input
+  return input
+end
+
+function calculate(a, op, b)
+  if op is "+"
+    return a plus b
+  end
+  if op is "-"
+    return a minus b
+  end
+  if op is "*"
+    return a multiply b
+  end
+  if op is "/"
+    if b is 0
+      return "Error: Division by zero"
+    end
+    return a divided by b
+  end
+  if op is "%"
+    return a mod b
+  end
+  return "Unknown operator"
+end
+
+# Demo calculations
+say "Demo calculations:"
+say "10 + 5 = " call calculate with 10, "+", 5
+say "10 - 5 = " call calculate with 10, "-", 5
+say "10 * 5 = " call calculate with 10, "*", 5
+say "10 / 5 = " call calculate with 10, "/", 5
+say "10 % 3 = " call calculate with 10, "%", 3
+say "10 / 0 = " call calculate with 10, "/", 0
+
+say ""
+say "Interactive mode (press Ctrl+C to exit):"
+# Uncomment below for interactive mode
+# repeat while true
+#   call showMenu
+#   ask "Choose (1-6): " into choice
+#   if choice is "6"
+#     say "Goodbye!"
+#     exit 0
+#   end
+#   if choice is "1" or choice is "2" or choice is "3" or choice is "4" or choice is "5"
+#     call getNumber with "First number: " into a
+#     call getNumber with "Second number: " into b
+#     remember ops as ["+", "-", "*", "/", "%"]
+#     remember op as ops[choice minus 1]
+#     say "Result: " call calculate with a, op, b
+#   otherwise
+#     say red "Invalid choice"
+#   end
+# end

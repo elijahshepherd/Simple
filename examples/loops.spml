@@ -1,0 +1,73 @@
+# Loops - Simple 1.0 Example
+
+say "Loops Demo"
+say "=========="
+
+# Repeat N times
+say "Repeat 5 times:"
+repeat 5 times
+  say "  Iteration"
+end
+
+# Repeat with counter
+say ""
+say "Repeat with counter:"
+remember i as 1
+repeat 5 times
+  say "  Count: " i
+  remember i as i plus 1
+end
+
+# While loop
+say ""
+say "While loop (countdown from 5):"
+remember n as 5
+repeat while n is greater than 0
+  say "  " n
+  remember n as n minus 1
+end
+say "  Go!"
+
+# Nested loops
+say ""
+say "Nested loops (multiplication table):"
+remember row as 1
+repeat while row is less than or equal to 3
+  remember col as 1
+  remember line as ""
+  repeat while col is less than or equal to 3
+    remember line as line plus (row multiply col) plus " "
+    remember col as col plus 1
+  end
+  say "  " line
+  remember row as row plus 1
+end
+
+# Loop with break-like behavior (using condition)
+say ""
+say "Loop until condition:"
+remember found as false
+remember target as 7
+remember current as 1
+repeat while current is less than or equal to 10 and not found
+  say "  Checking " current "..."
+  if current is target
+    remember found as true
+    say green "  Found " target " at position " current "!"
+  end
+  remember current as current plus 1
+end
+
+if not found
+  say red "  Not found"
+end
+
+# Iterate over list
+say ""
+say "Iterate over list:"
+remember fruits as ["apple", "banana", "cherry"]
+remember i as 0
+repeat while i is less than fruits.length
+  say "  " (i plus 1) ". " fruits[i]
+  remember i as i plus 1
+end

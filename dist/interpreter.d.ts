@@ -1,0 +1,104 @@
+import { Program } from './parser.js';
+export type Value = string | number | boolean | null | Value[] | Map<string, Value> | Callable;
+export interface Callable {
+    call: (interpreter: Interpreter, args: Value[]) => Promise<Value> | Value;
+    arity: number;
+    name: string;
+}
+export declare class Environment {
+    private values;
+    private constants;
+    parent: Environment | null;
+    define(name: string, value: Value, constant?: boolean): void;
+    assign(name: string, value: Value): void;
+    get(name: string): Value;
+    getAt(name: string, distance: number): Value;
+    assignAt(name: string, value: Value, distance: number): void;
+    has(name: string): boolean;
+}
+export declare class ReturnValue extends Error {
+    value: Value;
+    constructor(value: Value);
+}
+export declare class Interpreter {
+    globals: Environment;
+    private environment;
+    private functions;
+    private locals;
+    private stdlib;
+    private _currentStyles;
+    constructor();
+    private defineGlobals;
+    interpret(program: Program): Promise<void>;
+    private execute;
+    private evaluate;
+    private lookupVariable;
+    private evaluateBinary;
+    private evaluateUnary;
+    private evaluateCall;
+    private evaluateIndex;
+    private evaluateProperty;
+    private checkNumberOperand;
+    private checkNumberOperands;
+    private isTruthy;
+    private isEqual;
+    private toNumber;
+    stringify(value: Value): string;
+    private output;
+    private executeSay;
+    private executeAsk;
+    private executeRemember;
+    private executeIf;
+    private executeRepeatTimes;
+    private executeRepeatWhile;
+    private executeFunction;
+    private executeReturn;
+    private executeCall;
+    private executeImport;
+    private executeWait;
+    private executeClear;
+    private executeExit;
+    private executeReadFile;
+    private executeFileExists;
+    private executePathJoin;
+    private executePathOp;
+    private executeCwd;
+    private executeListFolder;
+    private executeFolderExists;
+    private executeArgs;
+    private executeEnvGet;
+    private executeRunCommand;
+    private executeRandomInt;
+    private executeRandomFloat;
+    private executeRandomChoice;
+    private executeRandomShuffle;
+    private executeTimeNow;
+    private executeTimeFormat;
+    private executeTimeParse;
+    private executeTimeComponent;
+    private executeTextOp;
+    private executeTextSplit;
+    private executeTextJoin;
+    private executeTextReplace;
+    private executeTextContains;
+    private executeTextStartsWith;
+    private executeTextEndsWith;
+    private executeTextSubstring;
+    private executeMathOp;
+    private executeMathPow;
+    private executeMathMinMax;
+    private executeMathClamp;
+    private executeListPush;
+    private executeListPop;
+    private executeListLength;
+    private executeListContains;
+    private executeListIndexOf;
+    private executeListRemove;
+    private executeListSlice;
+    private executeListSort;
+    private executeListReverse;
+    private executeBlock;
+    private callUserFunction;
+    private callStdlib;
+}
+//# sourceMappingURL=interpreter.d.ts.map

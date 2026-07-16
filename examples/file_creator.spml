@@ -1,0 +1,44 @@
+# File Creator - Simple 1.0 Example
+
+import files
+import folders
+import text
+
+say "File Creator"
+say "============"
+
+# Create project structure
+folders.create "project"
+folders.create "project/src"
+folders.create "project/tests"
+folders.create "project/docs"
+
+say green "Created project structure"
+
+# Create main file
+remember mainCode as "# Main entry point\n\nfunction main\n  say \"Hello from \" projectName \"!\"\nend\n\ncall main"
+files.write "project/src/main.spml" into mainCode
+
+# Create config file
+remember config as "name: " projectName "\nversion: 1.0.0\nauthor: Simple User"
+files.write "project/config.yml" into config
+
+# Create README
+remember readme as "# " projectName "\n\nA Simple 1.0 project\n\n## Structure\n- src/ - Source files\n- tests/ - Test files\n- docs/ - Documentation"
+files.write "project/README.md" into readme
+
+# Create test file
+remember testCode as "# Tests for " projectName "\n\nfunction testHello\n  remember result as call greet with \"World\"\n  if result is \"Hello, World!\"\n    say green \"Test passed!\"\n  otherwise\n    say red \"Test failed!\"\n  end\nend"
+files.write "project/tests/test_main.spml" into testCode
+
+say ""
+say "Created files:"
+folders.list "project" into items
+remember i as 0
+repeat while i is less than items.length
+  say "  " items[i]
+  remember i as i plus 1
+end
+
+say ""
+say "Project created successfully!"

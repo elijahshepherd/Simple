@@ -1,0 +1,45 @@
+# Read File - Simple 1.0 Example
+
+import files
+
+say "Read File Demo"
+say "=============="
+
+# First, create a file to read
+remember testContent as "Line 1: Hello from Simple!\nLine 2: This is a test file.\nLine 3: Reading files is easy."
+files.write "demo.txt" into testContent
+
+say green "Created demo.txt"
+
+# Now read it back
+remember content as ""
+files.read "demo.txt" into content
+
+say ""
+say "File contents:"
+say content
+
+# Read line by line using split
+remember lines as text.split content by "\n"
+say ""
+say "Lines (" lines.length " total):"
+remember i as 0
+repeat while i is less than lines.length
+  remember lineNum as i plus 1
+  say lineNum ": " lines[i]
+  remember i as i plus 1
+end
+
+# Check if file exists
+remember exists as false
+files.exists "demo.txt" into exists
+say ""
+say "File exists: " exists
+
+files.exists "nonexistent.txt" into exists
+say "Missing file exists: " exists
+
+# Clean up
+files.delete "demo.txt"
+say ""
+say green "Cleaned up demo.txt"
