@@ -48,13 +48,15 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use a unique delimiter that won't appear in content
-          RAND=$(date +%s%N | sha256sum | head -c 16)
-          DELIMITER="RELEASE_EOF_${RAND}"
+          # Generate a unique delimiter that won't appear in content
+          UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || date +%s%N | sha256sum | head -c 32)
+          DELIMITER="RELEASE_BOUNDARY_${UUID}"
           
-          echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
-          cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "${DELIMITER}" >> $GITHUB_OUTPUT
+          {
+            echo "content<<${DELIMITER}"
+            cat "${{ steps.find_version.outputs.VERSION_FILE }}"
+            echo "${DELIMITER}"
+          } >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
