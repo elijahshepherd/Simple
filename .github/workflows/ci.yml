@@ -48,6 +48,13 @@ jobs:
           node bin/simple.js --version
           node bin/simple.js examples
 
+      - name: Test pkg build (Windows)
+        run: |
+          npm install -g pkg
+          pkg . --targets node18-win-x64 --output simple.exe
+          test -f simple.exe
+          echo "pkg build successful"
+
   build-windows:
     name: Test on Windows
     runs-on: windows-latest
@@ -71,3 +78,12 @@ jobs:
         shell: pwsh
         run: |
           node bin/simple.js run examples/hello.spml
+
+      - name: Test pkg build on Windows
+        shell: pwsh
+        run: |
+          npm install -g pkg
+          pkg . --targets node18-win-x64 --output simple.exe
+          test -f simple.exe
+          ./simple.exe --version
+          echo "Windows pkg build successful"

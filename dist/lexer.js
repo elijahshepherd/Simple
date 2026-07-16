@@ -1,4 +1,8 @@
-export var TokenType;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TokenType = void 0;
+exports.lex = lex;
+var TokenType;
 (function (TokenType) {
     // Literals
     TokenType["STRING"] = "STRING";
@@ -157,7 +161,7 @@ export var TokenType;
     TokenType["NEWLINE"] = "NEWLINE";
     TokenType["EOF"] = "EOF";
     TokenType["COMMENT"] = "COMMENT";
-})(TokenType || (TokenType = {}));
+})(TokenType || (exports.TokenType = TokenType = {}));
 const KEYWORDS = {
     'say': TokenType.SAY,
     'ask': TokenType.ASK,
@@ -314,7 +318,7 @@ const MULTI_WORD_KEYWORDS = [
     'ends with',
     'path name',
 ];
-export function lex(source) {
+function lex(source) {
     const tokens = [];
     let line = 1;
     let column = 1;

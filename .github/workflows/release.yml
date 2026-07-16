@@ -29,36 +29,35 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Find latest version file
+      - name: Find version file for tag
         id: find_version
         run: |
-          # Find the latest version file in docs/release/
-          VERSION_FILE=$(ls -t docs/release/*.md | head -n1)
-          echo "VERSION_FILE=$VERSION_FILE" >> $GITHUB_OUTPUT
+          # Extract version from tag (e.g., v1.5.0 -> 1.5.0)
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION_FILE="docs/release/${TAG_VERSION}.md"
           
-          # Extract version from filename (e.g., docs/release/1.0.md -> 1.0)
-          VERSION=$(basename "$VERSION_FILE" .md)
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          if [ ! -f "$VERSION_FILE" ]; then
+            echo "ERROR: Version file $VERSION_FILE not found!"
+            echo "Please create docs/release/${TAG_VERSION}.md before tagging."
+            exit 1
+          fi
+          
+          echo "VERSION_FILE=$VERSION_FILE" >> $GITHUB_OUTPUT
+          echo "VERSION=$TAG_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Read version file
+      - name: Read version file content
         id: read_version_file
         run: |
           echo "content<<EOF" >> $GITHUB_OUTPUT
           cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Extract version number from content
-        id: extract_version
-        run: |
-          VERSION=$(grep -i "^Version:" "${{ steps.find_version.outputs.VERSION_FILE }}" | head -n1 | cut -d':' -f2 | tr -d ' ')
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Run basic test
         run: |
           echo 'say "Hello from Simple!"' > /tmp/test.spml
           node bin/simple.js run /tmp/test.spml
 
-      - name: Package with pkg (Windows only)
+      - name: Package Windows executable with pkg
         run: |
           npm install -g pkg
           pkg . --targets node18-win-x64 --out-path dist-binaries
@@ -66,21 +65,18 @@ jobs:
       - name: List built binaries
         run: ls -la dist-binaries/
 
-- name: Upload Windows binary
+      - name: Upload Windows binary as artifact
         uses: actions/upload-artifact@v4
         with:
           name: simple-win-x64
           path: dist-binaries/simple.exe
 
-      # Extract tag name from ref
       - name: Extract tag name
         id: tag_name
         run: |
-          # Extract just the tag name from refs/tags/v1.0 -> v1.0
           TAG_NAME=${GITHUB_REF#refs/tags/}
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
 
-      # Create the GitHub release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -93,3 +89,20 @@ jobs:
             dist-binaries/simple.exe
           body: |
             ${{ steps.read_version_file.outputs.content }}
+
+            ---
+            **Download:** [simple.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag_name.outputs.TAG_NAME }}/simple.exe)
+
+            **Installation:**
+            1. Download `simple.exe` from the assets below
+            2. Run `simple.exe` - it will show a welcome screen and offer to install
+            3. After installation, open a **new terminal** and run `simple run-example hello`
+
+            **Built-in Examples:**
+            - `simple run-example hello` - Hello world with colors
+            - `simple run-example calculator` - Interactive calculator
+            - `simple run-example functions` - Functions and recursion
+            - `simple run-example lists` - List operations
+            - `simple run-example loops` - Various loop types
+            - `simple run-example conditions` - If/else conditions
+            - `simple examples` - List all examples

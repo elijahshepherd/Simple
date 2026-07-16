@@ -1,6 +1,42 @@
-import { SimpleError, typeMismatch, wrongArgCount, notCallable, divisionByZero, indexOutOfBounds, keyNotFound } from './errors.js';
-import { stdlib } from './stdlib.js';
-export class Environment {
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Interpreter = exports.ReturnValue = exports.Environment = void 0;
+const errors_js_1 = require("./errors.js");
+const stdlib_js_1 = require("./stdlib.js");
+class Environment {
     values = new Map();
     constants = new Set();
     parent = null;
@@ -53,7 +89,8 @@ export class Environment {
         return this.values.has(name) || (this.parent ? this.parent.has(name) : false);
     }
 }
-export class ReturnValue extends Error {
+exports.Environment = Environment;
+class ReturnValue extends Error {
     value;
     constructor(value) {
         super('return');
@@ -61,7 +98,8 @@ export class ReturnValue extends Error {
         this.name = 'ReturnValue';
     }
 }
-export class Interpreter {
+exports.ReturnValue = ReturnValue;
+class Interpreter {
     globals;
     environment;
     functions = new Map();
@@ -71,7 +109,7 @@ export class Interpreter {
     constructor() {
         this.globals = new Environment();
         this.environment = this.globals;
-        this.stdlib = stdlib;
+        this.stdlib = stdlib_js_1.stdlib;
         this.defineGlobals();
     }
     defineGlobals() {
@@ -106,7 +144,7 @@ export class Interpreter {
             }
         }
         catch (error) {
-            if (error instanceof SimpleError)
+            if (error instanceof errors_js_1.SimpleError)
                 throw error;
             throw error;
         }
@@ -437,7 +475,7 @@ export class Interpreter {
                     return String(left) + String(right);
                 if (Array.isArray(left) && Array.isArray(right))
                     return [...left, ...right];
-                throw typeMismatch({ line: 0, column: 0 }, 'number or string', typeof left);
+                throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'number or string', typeof left);
             case 'MINUS':
                 this.checkNumberOperands(left, right);
                 return left - right;
@@ -447,7 +485,7 @@ export class Interpreter {
             case 'DIVIDED_BY':
                 this.checkNumberOperands(left, right);
                 if (right === 0)
-                    throw divisionByZero({ line: 0, column: 0 });
+                    throw (0, errors_js_1.divisionByZero)({ line: 0, column: 0 });
                 return left / right;
             case 'MOD':
                 this.checkNumberOperands(left, right);
@@ -499,13 +537,82 @@ export class Interpreter {
                     const args = await Promise.all(expr.args.map(arg => this.evaluate(arg)));
                     const callable = func;
                     if (args.length !== callable.arity) {
-                        throw wrongArgCount({ line: 0, column: 0 }, callable.name, callable.arity, args.length);
+                        throw (0, errors_js_1.wrongArgCount)({ line: 0, column: 0 }, callable.name, callable.arity, args.length);
                     }
                     return callable.call(this, args);
                 }
             }
             catch {
                 // Fall through to normal evaluation
+            }
+        }
+        // Special case: handle list method calls via Property (e.g., nums.contains 4)
+        // When callee is Property(nums, contains), treat it as a list method call
+        if (expr.callee.type === 'Property' && expr.callee.object.type === 'Identifier') {
+            const objName = expr.callee.object.name;
+            const methodName = expr.callee.property.toLowerCase();
+            const args = await Promise.all(expr.args.map(arg => this.evaluate(arg)));
+            // Look up the object (list or string)
+            try {
+                const obj = this.environment.get(objName);
+                // Handle array methods
+                if (Array.isArray(obj)) {
+                    if (methodName === 'contains' && args.length === 1) {
+                        const targetVal = args[0];
+                        return obj.some(v => this.isEqual(v, targetVal));
+                    }
+                    if (methodName === 'indexof' && args.length === 1) {
+                        const targetVal = args[0];
+                        const idx = obj.findIndex(v => this.isEqual(v, targetVal));
+                        return idx >= 0 ? idx : -1;
+                    }
+                    if (methodName === 'remove' && args.length === 1) {
+                        const idx = this.toNumber(args[0]);
+                        if (idx < 0 || idx >= obj.length) {
+                            throw (0, errors_js_1.indexOutOfBounds)({ line: 0, column: 0 }, idx, obj.length);
+                        }
+                        return obj.splice(idx, 1)[0];
+                    }
+                    if (methodName === 'slice' && args.length >= 1) {
+                        const start = Math.floor(this.toNumber(args[0]));
+                        const end = args.length > 1 ? Math.floor(this.toNumber(args[1])) : undefined;
+                        return obj.slice(start, end);
+                    }
+                    if (methodName === 'sort') {
+                        return [...obj].sort((a, b) => {
+                            if (typeof a === 'number' && typeof b === 'number')
+                                return a - b;
+                            return String(a).localeCompare(String(b));
+                        });
+                    }
+                    if (methodName === 'reverse') {
+                        return [...obj].reverse();
+                    }
+                }
+                // Handle string methods
+                if (typeof obj === 'string') {
+                    if (methodName === 'upper')
+                        return obj.toUpperCase();
+                    if (methodName === 'lower')
+                        return obj.toLowerCase();
+                    if (methodName === 'trim')
+                        return obj.trim();
+                    if (methodName === 'length')
+                        return obj.length;
+                    if (methodName === 'contains' && args.length === 1)
+                        return obj.includes(String(args[0]));
+                    if (methodName === 'startswith' && args.length === 1)
+                        return obj.startsWith(String(args[0]));
+                    if (methodName === 'endswith' && args.length === 1)
+                        return obj.endsWith(String(args[0]));
+                    if (methodName === 'split' && args.length === 1)
+                        return obj.split(String(args[0]));
+                    if (methodName === 'replace' && args.length === 2)
+                        return obj.replaceAll(String(args[0]), String(args[1]));
+                }
+            }
+            catch (e) {
+                // If variable not found, fall through to normal handler
             }
         }
         const callee = await this.evaluate(expr.callee);
@@ -516,11 +623,11 @@ export class Interpreter {
         if (callee && typeof callee === 'object' && 'call' in callee && 'arity' in callee && 'name' in callee) {
             const callable = callee;
             if (args.length !== callable.arity) {
-                throw wrongArgCount({ line: 0, column: 0 }, callable.name, callable.arity, args.length);
+                throw (0, errors_js_1.wrongArgCount)({ line: 0, column: 0 }, callable.name, callable.arity, args.length);
             }
             return callable.call(this, args);
         }
-        throw notCallable({ line: 0, column: 0 }, String(callee));
+        throw (0, errors_js_1.notCallable)({ line: 0, column: 0 }, String(callee));
     }
     async evaluateIndex(expr) {
         const object = await this.evaluate(expr.object);
@@ -528,25 +635,25 @@ export class Interpreter {
         if (Array.isArray(object)) {
             const idx = this.toNumber(index);
             if (idx < 0 || idx >= object.length) {
-                throw indexOutOfBounds({ line: 0, column: 0 }, idx, object.length);
+                throw (0, errors_js_1.indexOutOfBounds)({ line: 0, column: 0 }, idx, object.length);
             }
             return object[idx];
         }
         if (object instanceof Map) {
             const key = String(index);
             if (!object.has(key)) {
-                throw keyNotFound({ line: 0, column: 0 }, key);
+                throw (0, errors_js_1.keyNotFound)({ line: 0, column: 0 }, key);
             }
             return object.get(key);
         }
-        throw typeMismatch({ line: 0, column: 0 }, 'list or dictionary', typeof object);
+        throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list or dictionary', typeof object);
     }
     async evaluateProperty(expr) {
         const object = await this.evaluate(expr.object);
         if (object instanceof Map) {
             const value = object.get(expr.property);
             if (value === undefined) {
-                throw keyNotFound({ line: 0, column: 0 }, expr.property);
+                throw (0, errors_js_1.keyNotFound)({ line: 0, column: 0 }, expr.property);
             }
             return value;
         }
@@ -555,18 +662,26 @@ export class Interpreter {
             if (expr.property === 'length') {
                 return object.length;
             }
-            throw keyNotFound({ line: 0, column: 0 }, expr.property);
+            // Handle list method calls via property access (e.g., list.pop)
+            if (expr.property === 'pop') {
+                const popped = object.pop();
+                return popped ?? null;
+            }
+            if (expr.property === 'contains') {
+                return false; // Should be handled differently
+            }
+            throw (0, errors_js_1.keyNotFound)({ line: 0, column: 0 }, expr.property);
         }
-        throw typeMismatch({ line: 0, column: 0 }, 'dictionary or list', typeof object);
+        throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'dictionary or list', typeof object);
     }
     checkNumberOperand(operand) {
         if (typeof operand !== 'number') {
-            throw typeMismatch({ line: 0, column: 0 }, 'number', typeof operand);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'number', typeof operand);
         }
     }
     checkNumberOperands(left, right) {
         if (typeof left !== 'number' || typeof right !== 'number') {
-            throw typeMismatch({ line: 0, column: 0 }, 'number', typeof left);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'number', typeof left);
         }
     }
     isTruthy(value) {
@@ -612,7 +727,7 @@ export class Interpreter {
                 throw new Error(`Cannot convert "${value}" to number`);
             return n;
         }
-        throw typeMismatch({ line: 0, column: 0 }, 'number', typeof value);
+        throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'number', typeof value);
     }
     stringify(value) {
         if (value === null)
@@ -715,7 +830,7 @@ export class Interpreter {
     }
     async executeAsk(stmt) {
         const prompt = this.stringify(await this.evaluate(stmt.prompt));
-        const readline = await import('readline/promises');
+        const readline = await Promise.resolve().then(() => __importStar(require('readline/promises')));
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
         const answer = await rl.question(prompt + ' ');
         rl.close();
@@ -759,7 +874,7 @@ export class Interpreter {
     async executeCall(stmt) {
         const func = this.globals.get(stmt.name);
         if (!(func && typeof func === 'object' && 'call' in func)) {
-            throw notCallable({ line: 0, column: 0 }, stmt.name);
+            throw (0, errors_js_1.notCallable)({ line: 0, column: 0 }, stmt.name);
         }
         const args = await Promise.all(stmt.args.map(arg => this.evaluate(arg)));
         func.call(this, args);
@@ -850,14 +965,14 @@ export class Interpreter {
     async executeRandomChoice(stmt) {
         const list = await this.evaluate(stmt.list);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         const result = await this.callStdlib('random', 'choice', [list]);
         this.environment.define(stmt.target, result);
     }
     async executeRandomShuffle(stmt) {
         const list = await this.evaluate(stmt.list);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         const result = await this.callStdlib('random', 'shuffle', [list]);
         this.environment.define(stmt.target, result);
     }
@@ -959,34 +1074,34 @@ export class Interpreter {
         const list = await this.evaluate(stmt.list);
         const value = await this.evaluate(stmt.value);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         list.push(value);
     }
     async executeListPop(stmt) {
         const list = await this.evaluate(stmt.list);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         const result = list.pop();
         this.environment.define(stmt.target, result ?? null);
     }
     async executeListLength(stmt) {
         const list = await this.evaluate(stmt.list);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         this.environment.define(stmt.target, list.length);
     }
     async executeListContains(stmt) {
         const list = await this.evaluate(stmt.list);
         const value = await this.evaluate(stmt.value);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         this.environment.define(stmt.target, list.some(v => this.isEqual(v, value)));
     }
     async executeListIndexOf(stmt) {
         const list = await this.evaluate(stmt.list);
         const value = await this.evaluate(stmt.value);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         const idx = list.findIndex(v => this.isEqual(v, value));
         this.environment.define(stmt.target, idx >= 0 ? idx : -1);
     }
@@ -994,9 +1109,9 @@ export class Interpreter {
         const list = await this.evaluate(stmt.list);
         const index = Math.floor(this.toNumber(await this.evaluate(stmt.index)));
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         if (index < 0 || index >= list.length)
-            throw indexOutOfBounds({ line: 0, column: 0 }, index, list.length);
+            throw (0, errors_js_1.indexOutOfBounds)({ line: 0, column: 0 }, index, list.length);
         list.splice(index, 1);
     }
     async executeListSlice(stmt) {
@@ -1004,13 +1119,13 @@ export class Interpreter {
         const start = Math.floor(this.toNumber(await this.evaluate(stmt.start)));
         const end = stmt.end ? Math.floor(this.toNumber(await this.evaluate(stmt.end))) : undefined;
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         this.environment.define(stmt.target, list.slice(start, end));
     }
     async executeListSort(stmt) {
         const list = await this.evaluate(stmt.list);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         list.sort((a, b) => {
             if (typeof a === 'number' && typeof b === 'number')
                 return a - b;
@@ -1021,7 +1136,7 @@ export class Interpreter {
     async executeListReverse(stmt) {
         const list = await this.evaluate(stmt.list);
         if (!Array.isArray(list))
-            throw typeMismatch({ line: 0, column: 0 }, 'list', typeof list);
+            throw (0, errors_js_1.typeMismatch)({ line: 0, column: 0 }, 'list', typeof list);
         list.reverse();
         this.environment.define(stmt.target, list);
     }
@@ -1063,4 +1178,5 @@ export class Interpreter {
         return fn.impl(this, args);
     }
 }
+exports.Interpreter = Interpreter;
 //# sourceMappingURL=interpreter.js.map

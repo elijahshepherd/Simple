@@ -1,21 +1,24 @@
-import { TokenType, lex } from './lexer.js';
-import { SimpleError, unexpectedToken } from './errors.js';
-export class Parser {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Parser = void 0;
+const lexer_js_1 = require("./lexer.js");
+const errors_js_1 = require("./errors.js");
+class Parser {
     tokens;
     current = 0;
     sourceLines;
     constructor(source) {
-        this.tokens = lex(source);
+        this.tokens = (0, lexer_js_1.lex)(source);
         this.sourceLines = source.split('\n');
     }
     parse() {
         const statements = [];
-        while (!this.check(TokenType.EOF)) {
-            if (this.check(TokenType.NEWLINE)) {
+        while (!this.check(lexer_js_1.TokenType.EOF)) {
+            if (this.check(lexer_js_1.TokenType.NEWLINE)) {
                 this.advance();
                 continue;
             }
-            if (this.check(TokenType.COMMENT)) {
+            if (this.check(lexer_js_1.TokenType.COMMENT)) {
                 this.advance();
                 continue;
             }
@@ -25,113 +28,113 @@ export class Parser {
     }
     statement() {
         // Import
-        if (this.match(TokenType.IMPORT))
+        if (this.match(lexer_js_1.TokenType.IMPORT))
             return this.importStatement();
         // Say
-        if (this.match(TokenType.SAY))
+        if (this.match(lexer_js_1.TokenType.SAY))
             return this.sayStatement();
         // Ask
-        if (this.match(TokenType.ASK))
+        if (this.match(lexer_js_1.TokenType.ASK))
             return this.askStatement();
         // Remember / Constant
-        if (this.match(TokenType.REMEMBER))
+        if (this.match(lexer_js_1.TokenType.REMEMBER))
             return this.rememberStatement(false);
-        if (this.match(TokenType.CONSTANT))
+        if (this.match(lexer_js_1.TokenType.CONSTANT))
             return this.rememberStatement(true);
         // If
-        if (this.match(TokenType.IF))
+        if (this.match(lexer_js_1.TokenType.IF))
             return this.ifStatement();
         // Repeat
-        if (this.match(TokenType.REPEAT))
+        if (this.match(lexer_js_1.TokenType.REPEAT))
             return this.repeatStatement();
         // Function
-        if (this.match(TokenType.FUNCTION))
+        if (this.match(lexer_js_1.TokenType.FUNCTION))
             return this.functionStatement();
         // Return
-        if (this.match(TokenType.RETURN))
+        if (this.match(lexer_js_1.TokenType.RETURN))
             return this.returnStatement();
         // Call
-        if (this.match(TokenType.CALL))
+        if (this.match(lexer_js_1.TokenType.CALL))
             return this.callStatement();
         // Wait
-        if (this.match(TokenType.WAIT))
+        if (this.match(lexer_js_1.TokenType.WAIT))
             return this.waitStatement();
         // Clear
-        if (this.match(TokenType.CLEAR))
+        if (this.match(lexer_js_1.TokenType.CLEAR))
             return { type: 'Clear' };
         // Exit
-        if (this.match(TokenType.EXIT))
+        if (this.match(lexer_js_1.TokenType.EXIT))
             return this.exitStatement();
         // File operations
-        if (this.match(TokenType.CREATE)) {
-            if (this.match(TokenType.FILE))
+        if (this.match(lexer_js_1.TokenType.CREATE)) {
+            if (this.match(lexer_js_1.TokenType.FILE))
                 return this.createFileStatement();
-            if (this.match(TokenType.FOLDER) || this.match(TokenType.MAKE))
+            if (this.match(lexer_js_1.TokenType.FOLDER) || this.match(lexer_js_1.TokenType.MAKE))
                 return this.createFolderStatement();
         }
-        if (this.match(TokenType.DELETE)) {
-            if (this.match(TokenType.FILE))
+        if (this.match(lexer_js_1.TokenType.DELETE)) {
+            if (this.match(lexer_js_1.TokenType.FILE))
                 return this.deleteFileStatement();
-            if (this.match(TokenType.FOLDER))
+            if (this.match(lexer_js_1.TokenType.FOLDER))
                 return this.deleteFolderStatement();
         }
-        if (this.match(TokenType.WRITE) || this.match(TokenType.APPEND)) {
-            const append = this.previous().type === TokenType.APPEND;
+        if (this.match(lexer_js_1.TokenType.WRITE) || this.match(lexer_js_1.TokenType.APPEND)) {
+            const append = this.previous().type === lexer_js_1.TokenType.APPEND;
             return this.writeFileStatement(append);
         }
-        if (this.match(TokenType.READ))
+        if (this.match(lexer_js_1.TokenType.READ))
             return this.readFileStatement();
-        if (this.match(TokenType.COPY) && this.match(TokenType.FILE))
+        if (this.match(lexer_js_1.TokenType.COPY) && this.match(lexer_js_1.TokenType.FILE))
             return this.copyFileStatement();
-        if (this.match(TokenType.MOVE) && this.match(TokenType.FILE))
+        if (this.match(lexer_js_1.TokenType.MOVE) && this.match(lexer_js_1.TokenType.FILE))
             return this.moveFileStatement();
-        if (this.match(TokenType.RENAME) && this.match(TokenType.FILE))
+        if (this.match(lexer_js_1.TokenType.RENAME) && this.match(lexer_js_1.TokenType.FILE))
             return this.renameFileStatement();
-        if (this.match(TokenType.EXISTS) && this.match(TokenType.FILE))
+        if (this.match(lexer_js_1.TokenType.EXISTS) && this.match(lexer_js_1.TokenType.FILE))
             return this.fileExistsStatement();
-        if (this.match(TokenType.PATH))
+        if (this.match(lexer_js_1.TokenType.PATH))
             return this.pathStatement();
-        if (this.match(TokenType.LIST) && this.match(TokenType.FOLDER))
+        if (this.match(lexer_js_1.TokenType.LIST) && this.match(lexer_js_1.TokenType.FOLDER))
             return this.listFolderStatement();
-        if (this.match(TokenType.EXISTS) && this.match(TokenType.FOLDER))
+        if (this.match(lexer_js_1.TokenType.EXISTS) && this.match(lexer_js_1.TokenType.FOLDER))
             return this.folderExistsStatement();
         // System
-        if (this.match(TokenType.ARGS))
+        if (this.match(lexer_js_1.TokenType.ARGS))
             return this.argsStatement();
-        if (this.match(TokenType.ENV))
+        if (this.match(lexer_js_1.TokenType.ENV))
             return this.envStatement();
-        if (this.match(TokenType.RUN))
+        if (this.match(lexer_js_1.TokenType.RUN))
             return this.runCommandStatement();
-        if (this.match(TokenType.PLATFORM))
+        if (this.match(lexer_js_1.TokenType.PLATFORM))
             return this.platformStatement();
-        if (this.match(TokenType.ARCH))
+        if (this.match(lexer_js_1.TokenType.ARCH))
             return this.archStatement();
         // Random
-        if (this.match(TokenType.RANDOM))
+        if (this.match(lexer_js_1.TokenType.RANDOM))
             return this.randomStatement();
         // Time
-        if (this.match(TokenType.NOW))
+        if (this.match(lexer_js_1.TokenType.NOW))
             return this.timeStatement();
-        if (this.match(TokenType.SLEEP))
+        if (this.match(lexer_js_1.TokenType.SLEEP))
             return this.sleepStatement();
-        if (this.match(TokenType.FORMAT))
+        if (this.match(lexer_js_1.TokenType.FORMAT))
             return this.formatStatement();
         // Text
-        if (this.match(TokenType.TEXT))
+        if (this.match(lexer_js_1.TokenType.TEXT))
             return this.textStatement();
         // Math
-        if (this.match(TokenType.MATH))
+        if (this.match(lexer_js_1.TokenType.MATH))
             return this.mathStatement();
         // List operations
-        if (this.check(TokenType.IDENTIFIER)) {
+        if (this.check(lexer_js_1.TokenType.IDENTIFIER)) {
             const next = this.peek(1);
-            if (next?.type === TokenType.DOT) {
+            if (next?.type === lexer_js_1.TokenType.DOT) {
                 return this.methodCallStatement();
             }
             // Handle "list.method args" syntax without dot (e.g., "numbers.push 6")
             // The method name can be IDENTIFIER or a keyword like LENGTH, CONTAINS
-            if (next && (next.type === TokenType.IDENTIFIER ||
-                next.type === TokenType.LENGTH || next.type === TokenType.CONTAINS)) {
+            if (next && (next.type === lexer_js_1.TokenType.IDENTIFIER ||
+                next.type === lexer_js_1.TokenType.LENGTH || next.type === lexer_js_1.TokenType.CONTAINS)) {
                 return this.spaceDelimMethodCall();
             }
         }
@@ -143,7 +146,7 @@ export class Parser {
     importStatement() {
         const nameToken = this.consumeName(['module name']);
         let alias;
-        if (this.match(TokenType.AS)) {
+        if (this.match(lexer_js_1.TokenType.AS)) {
             const aliasToken = this.consumeName(['alias name']);
             alias = aliasToken.value;
         }
@@ -154,47 +157,47 @@ export class Parser {
         const styles = [];
         // Parse color/style modifiers before the expression
         while (true) {
-            if (this.match(TokenType.RED))
+            if (this.match(lexer_js_1.TokenType.RED))
                 styles.push('red');
-            else if (this.match(TokenType.GREEN))
+            else if (this.match(lexer_js_1.TokenType.GREEN))
                 styles.push('green');
-            else if (this.match(TokenType.BLUE))
+            else if (this.match(lexer_js_1.TokenType.BLUE))
                 styles.push('blue');
-            else if (this.match(TokenType.YELLOW))
+            else if (this.match(lexer_js_1.TokenType.YELLOW))
                 styles.push('yellow');
-            else if (this.match(TokenType.CYAN))
+            else if (this.match(lexer_js_1.TokenType.CYAN))
                 styles.push('cyan');
-            else if (this.match(TokenType.MAGENTA))
+            else if (this.match(lexer_js_1.TokenType.MAGENTA))
                 styles.push('magenta');
-            else if (this.match(TokenType.WHITE))
+            else if (this.match(lexer_js_1.TokenType.WHITE))
                 styles.push('white');
-            else if (this.match(TokenType.BLACK))
+            else if (this.match(lexer_js_1.TokenType.BLACK))
                 styles.push('black');
-            else if (this.match(TokenType.BRIGHT))
+            else if (this.match(lexer_js_1.TokenType.BRIGHT))
                 styles.push('bright');
-            else if (this.match(TokenType.BOLD))
+            else if (this.match(lexer_js_1.TokenType.BOLD))
                 styles.push('bold');
-            else if (this.match(TokenType.ITALIC))
+            else if (this.match(lexer_js_1.TokenType.ITALIC))
                 styles.push('italic');
-            else if (this.match(TokenType.UNDERLINE))
+            else if (this.match(lexer_js_1.TokenType.UNDERLINE))
                 styles.push('underline');
-            else if (this.match(TokenType.RESET))
+            else if (this.match(lexer_js_1.TokenType.RESET))
                 styles.push('reset');
-            else if (this.match(TokenType.BG_RED))
+            else if (this.match(lexer_js_1.TokenType.BG_RED))
                 styles.push('bgRed');
-            else if (this.match(TokenType.BG_GREEN))
+            else if (this.match(lexer_js_1.TokenType.BG_GREEN))
                 styles.push('bgGreen');
-            else if (this.match(TokenType.BG_BLUE))
+            else if (this.match(lexer_js_1.TokenType.BG_BLUE))
                 styles.push('bgBlue');
-            else if (this.match(TokenType.BG_YELLOW))
+            else if (this.match(lexer_js_1.TokenType.BG_YELLOW))
                 styles.push('bgYellow');
-            else if (this.match(TokenType.BG_CYAN))
+            else if (this.match(lexer_js_1.TokenType.BG_CYAN))
                 styles.push('bgCyan');
-            else if (this.match(TokenType.BG_MAGENTA))
+            else if (this.match(lexer_js_1.TokenType.BG_MAGENTA))
                 styles.push('bgMagenta');
-            else if (this.match(TokenType.BG_WHITE))
+            else if (this.match(lexer_js_1.TokenType.BG_WHITE))
                 styles.push('bgWhite');
-            else if (this.match(TokenType.BG_BLACK))
+            else if (this.match(lexer_js_1.TokenType.BG_BLACK))
                 styles.push('bgBlack');
             else
                 break;
@@ -205,7 +208,7 @@ export class Parser {
         // Check if next token could start an expression (for implicit concatenation)
         while (this.isExpressionStart()) {
             const right = this.expression();
-            expr = { type: 'Binary', left: expr, operator: TokenType.PLUS, right };
+            expr = { type: 'Binary', left: expr, operator: lexer_js_1.TokenType.PLUS, right };
         }
         this.consumeNewline();
         return { type: 'Say', expr, styles };
@@ -213,24 +216,25 @@ export class Parser {
     // Check if current token can start an expression (for implicit concatenation in say)
     isExpressionStart() {
         const token = this.peek();
-        return (token.type === TokenType.STRING ||
-            token.type === TokenType.NUMBER ||
-            token.type === TokenType.BOOLEAN ||
-            token.type === TokenType.IDENTIFIER ||
-            token.type === TokenType.CALL ||
-            token.type === TokenType.LPAREN ||
-            token.type === TokenType.LBRACKET ||
-            token.type === TokenType.LBRACE ||
-            token.type === TokenType.MINUS ||
-            token.type === TokenType.NOT);
+        return (token.type === lexer_js_1.TokenType.STRING ||
+            token.type === lexer_js_1.TokenType.NUMBER ||
+            token.type === lexer_js_1.TokenType.BOOLEAN ||
+            token.type === lexer_js_1.TokenType.IDENTIFIER ||
+            token.type === lexer_js_1.TokenType.CALL ||
+            token.type === lexer_js_1.TokenType.LPAREN ||
+            token.type === lexer_js_1.TokenType.LBRACKET ||
+            token.type === lexer_js_1.TokenType.LBRACE ||
+            token.type === lexer_js_1.TokenType.MINUS ||
+            token.type === lexer_js_1.TokenType.NOT);
     }
     // Check if a property name is a module method that can be called with space-separated args
     isModuleCallStart(method) {
         const moduleMethods = new Set(['int', 'float', 'choice', 'shuffle', 'bool',
-            'upper', 'lower', 'trim', 'split', 'join', 'replace', 'length', 'contains',
+            'upper', 'lower', 'trim', 'split', 'join', 'replace', 'contains',
             'startswith', 'endswith', 'substring',
             'abs', 'round', 'floor', 'ceil', 'sqrt', 'pow', 'min', 'max', 'clamp',
-            'random', 'pi', 'e']);
+            'random', 'pi', 'e', 'indexof', 'remove', 'slice', 'sort', 'reverse',
+            'pop', 'push']);
         return moduleMethods.has(method.toLowerCase());
     }
     // Parse arguments for a module-style call like "random.int 1 to 100"
@@ -238,9 +242,9 @@ export class Parser {
     parseModuleCallArgs() {
         const args = [];
         const separators = new Set([
-            TokenType.TO, TokenType.FROM, TokenType.WITH, TokenType.AS, TokenType.BY,
-            TokenType.INTO, TokenType.NEWLINE, TokenType.EOF, TokenType.OTHERWISE,
-            TokenType.END, TokenType.COMMA
+            lexer_js_1.TokenType.TO, lexer_js_1.TokenType.FROM, lexer_js_1.TokenType.WITH, lexer_js_1.TokenType.AS, lexer_js_1.TokenType.BY,
+            lexer_js_1.TokenType.INTO, lexer_js_1.TokenType.NEWLINE, lexer_js_1.TokenType.EOF, lexer_js_1.TokenType.OTHERWISE,
+            lexer_js_1.TokenType.END, lexer_js_1.TokenType.COMMA
         ]);
         while (!this.isAtEnd() && !separators.has(this.peek().type) && this.isExpressionStart()) {
             args.push(this.expression());
@@ -262,14 +266,14 @@ export class Parser {
     }
     askStatement() {
         const prompt = this.expression();
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'Ask', prompt, target: target.value };
     }
     rememberStatement(constant) {
         const nameToken = this.consumeName(['variable name']);
-        this.consume(TokenType.AS, ['"as"']);
+        this.consume(lexer_js_1.TokenType.AS, ['"as"']);
         const value = this.expression();
         this.consumeNewline();
         return { type: 'Remember', name: nameToken.value, value, constant };
@@ -278,125 +282,125 @@ export class Parser {
         const condition = this.expression();
         this.consumeNewline();
         const thenBranch = [];
-        while (!this.check(TokenType.OTHERWISE) && !this.check(TokenType.END) && !this.check(TokenType.EOF)) {
-            if (this.check(TokenType.NEWLINE)) {
+        while (!this.check(lexer_js_1.TokenType.OTHERWISE) && !this.check(lexer_js_1.TokenType.END) && !this.check(lexer_js_1.TokenType.EOF)) {
+            if (this.check(lexer_js_1.TokenType.NEWLINE)) {
                 this.advance();
                 continue;
             }
-            if (this.check(TokenType.COMMENT)) {
+            if (this.check(lexer_js_1.TokenType.COMMENT)) {
                 this.advance();
                 continue;
             }
             thenBranch.push(this.statement());
         }
         let elseBranch = [];
-        if (this.match(TokenType.OTHERWISE)) {
+        if (this.match(lexer_js_1.TokenType.OTHERWISE)) {
             this.consumeNewline();
-            while (!this.check(TokenType.END) && !this.check(TokenType.EOF)) {
-                if (this.check(TokenType.NEWLINE)) {
+            while (!this.check(lexer_js_1.TokenType.END) && !this.check(lexer_js_1.TokenType.EOF)) {
+                if (this.check(lexer_js_1.TokenType.NEWLINE)) {
                     this.advance();
                     continue;
                 }
-                if (this.check(TokenType.COMMENT)) {
+                if (this.check(lexer_js_1.TokenType.COMMENT)) {
                     this.advance();
                     continue;
                 }
                 elseBranch.push(this.statement());
             }
         }
-        this.consume(TokenType.END, ['"end"']);
+        this.consume(lexer_js_1.TokenType.END, ['"end"']);
         this.consumeNewline();
         return { type: 'If', condition, thenBranch, elseBranch };
     }
     repeatStatement() {
         // Check for "repeat N times" or "repeat while condition"
-        if (this.check(TokenType.NUMBER) || this.check(TokenType.IDENTIFIER) || this.check(TokenType.LPAREN)) {
+        if (this.check(lexer_js_1.TokenType.NUMBER) || this.check(lexer_js_1.TokenType.IDENTIFIER) || this.check(lexer_js_1.TokenType.LPAREN)) {
             const count = this.expression();
-            this.consume(TokenType.TIMES, ['"times"']);
+            this.consume(lexer_js_1.TokenType.TIMES, ['"times"']);
             this.consumeNewline();
             const body = [];
-            while (!this.check(TokenType.END) && !this.check(TokenType.EOF)) {
-                if (this.check(TokenType.NEWLINE)) {
+            while (!this.check(lexer_js_1.TokenType.END) && !this.check(lexer_js_1.TokenType.EOF)) {
+                if (this.check(lexer_js_1.TokenType.NEWLINE)) {
                     this.advance();
                     continue;
                 }
-                if (this.check(TokenType.COMMENT)) {
+                if (this.check(lexer_js_1.TokenType.COMMENT)) {
                     this.advance();
                     continue;
                 }
                 body.push(this.statement());
             }
-            this.consume(TokenType.END, ['"end"']);
+            this.consume(lexer_js_1.TokenType.END, ['"end"']);
             this.consumeNewline();
             return { type: 'RepeatTimes', count, body };
         }
-        if (this.match(TokenType.WHILE)) {
+        if (this.match(lexer_js_1.TokenType.WHILE)) {
             const condition = this.expression();
             this.consumeNewline();
             const body = [];
-            while (!this.check(TokenType.END) && !this.check(TokenType.EOF)) {
-                if (this.check(TokenType.NEWLINE)) {
+            while (!this.check(lexer_js_1.TokenType.END) && !this.check(lexer_js_1.TokenType.EOF)) {
+                if (this.check(lexer_js_1.TokenType.NEWLINE)) {
                     this.advance();
                     continue;
                 }
-                if (this.check(TokenType.COMMENT)) {
+                if (this.check(lexer_js_1.TokenType.COMMENT)) {
                     this.advance();
                     continue;
                 }
                 body.push(this.statement());
             }
-            this.consume(TokenType.END, ['"end"']);
+            this.consume(lexer_js_1.TokenType.END, ['"end"']);
             this.consumeNewline();
             return { type: 'RepeatWhile', condition, body };
         }
-        throw unexpectedToken(this.peek(), ['number', 'identifier', '"while"']);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), ['number', 'identifier', '"while"']);
     }
     functionStatement() {
         const nameToken = this.consumeName(['function name']);
         const params = [];
         // Support both "function name(params)" and "function name with params"
-        if (this.match(TokenType.LPAREN)) {
+        if (this.match(lexer_js_1.TokenType.LPAREN)) {
             // Syntax: function name(param1, param2)
-            if (!this.check(TokenType.RPAREN)) {
+            if (!this.check(lexer_js_1.TokenType.RPAREN)) {
                 do {
                     const param = this.consumeName(['parameter name']);
                     params.push(param.value);
-                } while (this.match(TokenType.COMMA));
+                } while (this.match(lexer_js_1.TokenType.COMMA));
             }
-            this.consume(TokenType.RPAREN, ['")"']);
+            this.consume(lexer_js_1.TokenType.RPAREN, ['")"']);
         }
-        else if (this.match(TokenType.WITH)) {
+        else if (this.match(lexer_js_1.TokenType.WITH)) {
             // Syntax: function name with param1, param2
             do {
                 const param = this.consumeName(['parameter name']);
                 params.push(param.value);
-            } while (this.match(TokenType.COMMA));
+            } while (this.match(lexer_js_1.TokenType.COMMA));
         }
         this.consumeNewline();
         const body = [];
-        while (!this.check(TokenType.END) && !this.check(TokenType.EOF)) {
-            if (this.check(TokenType.NEWLINE)) {
+        while (!this.check(lexer_js_1.TokenType.END) && !this.check(lexer_js_1.TokenType.EOF)) {
+            if (this.check(lexer_js_1.TokenType.NEWLINE)) {
                 this.advance();
                 continue;
             }
-            if (this.check(TokenType.COMMENT)) {
+            if (this.check(lexer_js_1.TokenType.COMMENT)) {
                 this.advance();
                 continue;
             }
             body.push(this.statement());
         }
-        this.consume(TokenType.END, ['"end"']);
+        this.consume(lexer_js_1.TokenType.END, ['"end"']);
         this.consumeNewline();
         return { type: 'Function', name: nameToken.value, params, body };
     }
     returnStatement() {
         let value;
-        if (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF) && !this.check(TokenType.END)) {
+        if (!this.check(lexer_js_1.TokenType.NEWLINE) && !this.check(lexer_js_1.TokenType.EOF) && !this.check(lexer_js_1.TokenType.END)) {
             value = this.expression();
             // Parse additional expressions for implicit concatenation (like in say)
             while (this.isExpressionStart()) {
                 const right = this.expression();
-                value = { type: 'Binary', left: value, operator: TokenType.PLUS, right };
+                value = { type: 'Binary', left: value, operator: lexer_js_1.TokenType.PLUS, right };
             }
         }
         this.consumeNewline();
@@ -405,23 +409,23 @@ export class Parser {
     callStatement() {
         const nameToken = this.consumeName(['function name']);
         const args = [];
-        if (this.match(TokenType.WITH)) {
+        if (this.match(lexer_js_1.TokenType.WITH)) {
             do {
                 args.push(this.expression());
-            } while (this.match(TokenType.COMMA));
+            } while (this.match(lexer_js_1.TokenType.COMMA));
         }
         this.consumeNewline();
         return { type: 'Call', name: nameToken.value, args };
     }
     waitStatement() {
         const duration = this.expression();
-        this.match(TokenType.SECONDS); // optional "seconds"
+        this.match(lexer_js_1.TokenType.SECONDS); // optional "seconds"
         this.consumeNewline();
         return { type: 'Wait', duration };
     }
     exitStatement() {
         let code;
-        if (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF)) {
+        if (!this.check(lexer_js_1.TokenType.NEWLINE) && !this.check(lexer_js_1.TokenType.EOF)) {
             code = this.expression();
         }
         this.consumeNewline();
@@ -449,121 +453,121 @@ export class Parser {
     }
     writeFileStatement(append) {
         const content = this.expression();
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const path = this.expression();
         this.consumeNewline();
         return { type: 'WriteFile', path, content, append };
     }
     readFileStatement() {
         const path = this.expression();
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'ReadFile', path, target: target.value };
     }
     copyFileStatement() {
         const from = this.expression();
-        this.consume(TokenType.TO, ['"to"']); // We'll need to add TO token
+        this.consume(lexer_js_1.TokenType.TO, ['"to"']); // We'll need to add TO token
         const to = this.expression();
         this.consumeNewline();
         return { type: 'CopyFile', from, to };
     }
     moveFileStatement() {
         const from = this.expression();
-        this.consume(TokenType.TO, ['"to"']);
+        this.consume(lexer_js_1.TokenType.TO, ['"to"']);
         const to = this.expression();
         this.consumeNewline();
         return { type: 'MoveFile', from, to };
     }
     renameFileStatement() {
         const from = this.expression();
-        this.consume(TokenType.TO, ['"to"']);
+        this.consume(lexer_js_1.TokenType.TO, ['"to"']);
         const to = this.expression();
         this.consumeNewline();
         return { type: 'RenameFile', from, to };
     }
     fileExistsStatement() {
         const path = this.expression();
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'FileExists', path, target: target.value };
     }
     pathStatement() {
-        if (this.match(TokenType.JOIN)) {
+        if (this.match(lexer_js_1.TokenType.JOIN)) {
             const parts = [];
             do {
                 parts.push(this.expression());
-            } while (this.match(TokenType.COMMA));
-            this.consume(TokenType.INTO, ['"into"']);
+            } while (this.match(lexer_js_1.TokenType.COMMA));
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'PathJoin', parts, target: target.value };
         }
-        if (this.match(TokenType.DIR)) {
+        if (this.match(lexer_js_1.TokenType.DIR)) {
             const path = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'PathDir', path, target: target.value };
         }
-        if (this.match(TokenType.NAME)) {
+        if (this.match(lexer_js_1.TokenType.NAME)) {
             const path = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'PathName', path, target: target.value };
         }
-        if (this.match(TokenType.EXT)) {
+        if (this.match(lexer_js_1.TokenType.EXT)) {
             const path = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'PathExt', path, target: target.value };
         }
-        throw unexpectedToken(this.peek(), ['"join"', '"dir"', '"name"', '"ext"']);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), ['"join"', '"dir"', '"name"', '"ext"']);
     }
     listFolderStatement() {
         const path = this.expression();
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'ListFolder', path, target: target.value };
     }
     folderExistsStatement() {
         const path = this.expression();
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'FolderExists', path, target: target.value };
     }
     argsStatement() {
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'Args', target: target.value };
     }
     envStatement() {
-        if (this.match(TokenType.GET)) {
+        if (this.match(lexer_js_1.TokenType.GET)) {
             const key = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'EnvGet', key, target: target.value };
         }
-        if (this.match(TokenType.SET)) {
+        if (this.match(lexer_js_1.TokenType.SET)) {
             const key = this.expression();
-            this.consume(TokenType.AS, ['"as"']);
+            this.consume(lexer_js_1.TokenType.AS, ['"as"']);
             const value = this.expression();
             this.consumeNewline();
             return { type: 'EnvSet', key, value };
         }
-        throw unexpectedToken(this.peek(), ['"get"', '"set"']);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), ['"get"', '"set"']);
     }
     runCommandStatement() {
         const command = this.expression();
         let target;
-        if (this.match(TokenType.INTO)) {
+        if (this.match(lexer_js_1.TokenType.INTO)) {
             const targetToken = this.consumeName(['variable name']);
             target = targetToken.value;
         }
@@ -571,26 +575,26 @@ export class Parser {
         return { type: 'RunCommand', command, target };
     }
     platformStatement() {
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'Platform', target: target.value };
     }
     archStatement() {
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'Arch', target: target.value };
     }
     randomStatement() {
         // Handle optional dot after random (random.int, random.float, etc.)
-        this.match(TokenType.DOT);
-        if (this.match(TokenType.INT)) {
+        this.match(lexer_js_1.TokenType.DOT);
+        if (this.match(lexer_js_1.TokenType.INT)) {
             const min = this.expression();
-            this.consume(TokenType.TO, ['"to"']);
+            this.consume(lexer_js_1.TokenType.TO, ['"to"']);
             const max = this.expression();
             // Random can be used as expression (no into) or statement (with into)
-            if (this.match(TokenType.INTO)) {
+            if (this.match(lexer_js_1.TokenType.INTO)) {
                 const target = this.consumeName(['variable name']);
                 this.consumeNewline();
                 return { type: 'RandomInt', min, max, target: target.value };
@@ -598,11 +602,11 @@ export class Parser {
             this.consumeNewline();
             return { type: 'Expression', expr: { type: 'Call', callee: { type: 'Identifier', name: 'random.int' }, args: [min, max] } };
         }
-        if (this.match(TokenType.FLOAT)) {
+        if (this.match(lexer_js_1.TokenType.FLOAT)) {
             const min = this.expression();
-            this.consume(TokenType.TO, ['"to"']);
+            this.consume(lexer_js_1.TokenType.TO, ['"to"']);
             const max = this.expression();
-            if (this.match(TokenType.INTO)) {
+            if (this.match(lexer_js_1.TokenType.INTO)) {
                 const target = this.consumeName(['variable name']);
                 this.consumeNewline();
                 return { type: 'RandomFloat', min, max, target: target.value };
@@ -610,10 +614,10 @@ export class Parser {
             this.consumeNewline();
             return { type: 'Expression', expr: { type: 'Call', callee: { type: 'Identifier', name: 'random.float' }, args: [min, max] } };
         }
-        if (this.match(TokenType.CHOICE)) {
-            this.consume(TokenType.FROM, ['"from"']);
+        if (this.match(lexer_js_1.TokenType.CHOICE)) {
+            this.consume(lexer_js_1.TokenType.FROM, ['"from"']);
             const list = this.expression();
-            if (this.match(TokenType.INTO)) {
+            if (this.match(lexer_js_1.TokenType.INTO)) {
                 const target = this.consumeName(['variable name']);
                 this.consumeNewline();
                 return { type: 'RandomChoice', list, target: target.value };
@@ -621,9 +625,9 @@ export class Parser {
             this.consumeNewline();
             return { type: 'Expression', expr: { type: 'Call', callee: { type: 'Identifier', name: 'random.choice' }, args: [list] } };
         }
-        if (this.match(TokenType.SHUFFLE)) {
+        if (this.match(lexer_js_1.TokenType.SHUFFLE)) {
             const list = this.expression();
-            if (this.match(TokenType.INTO)) {
+            if (this.match(lexer_js_1.TokenType.INTO)) {
                 const target = this.consumeName(['variable name']);
                 this.consumeNewline();
                 return { type: 'RandomShuffle', list, target: target.value };
@@ -631,8 +635,8 @@ export class Parser {
             this.consumeNewline();
             return { type: 'Expression', expr: { type: 'Call', callee: { type: 'Identifier', name: 'random.shuffle' }, args: [list] } };
         }
-        if (this.match(TokenType.BOOL)) {
-            if (this.match(TokenType.INTO)) {
+        if (this.match(lexer_js_1.TokenType.BOOL)) {
+            if (this.match(lexer_js_1.TokenType.INTO)) {
                 const target = this.consumeName(['variable name']);
                 this.consumeNewline();
                 return { type: 'RandomBool', target: target.value };
@@ -640,16 +644,16 @@ export class Parser {
             this.consumeNewline();
             return { type: 'Expression', expr: { type: 'Call', callee: { type: 'Identifier', name: 'random.bool' }, args: [] } };
         }
-        throw unexpectedToken(this.peek(), ['"int"', '"float"', '"choice"', '"shuffle"', '"bool"']);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), ['"int"', '"float"', '"choice"', '"shuffle"', '"bool"']);
     }
     timeStatement() {
-        if (this.match(TokenType.NOW)) {
-            this.consume(TokenType.INTO, ['"into"']);
+        if (this.match(lexer_js_1.TokenType.NOW)) {
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TimeNow', target: target.value };
         }
-        throw unexpectedToken(this.peek(), ['"now"']);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), ['"now"']);
     }
     sleepStatement() {
         const duration = this.expression();
@@ -658,106 +662,106 @@ export class Parser {
     }
     formatStatement() {
         const timestamp = this.expression();
-        this.consume(TokenType.AS, ['"as"']);
+        this.consume(lexer_js_1.TokenType.AS, ['"as"']);
         const format = this.expression();
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         return { type: 'TimeFormat', timestamp, format, target: target.value };
     }
     textStatement() {
-        if (this.match(TokenType.UPPER)) {
+        if (this.match(lexer_js_1.TokenType.UPPER)) {
             const text = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextUpper', text, target: target.value };
         }
-        if (this.match(TokenType.LOWER)) {
+        if (this.match(lexer_js_1.TokenType.LOWER)) {
             const text = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextLower', text, target: target.value };
         }
-        if (this.match(TokenType.TRIM)) {
+        if (this.match(lexer_js_1.TokenType.TRIM)) {
             const text = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextTrim', text, target: target.value };
         }
-        if (this.match(TokenType.SPLIT)) {
+        if (this.match(lexer_js_1.TokenType.SPLIT)) {
             const text = this.expression();
-            this.consume(TokenType.BY, ['"by"']);
+            this.consume(lexer_js_1.TokenType.BY, ['"by"']);
             const separator = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextSplit', text, separator, target: target.value };
         }
-        if (this.match(TokenType.JOIN)) {
+        if (this.match(lexer_js_1.TokenType.JOIN)) {
             const list = this.expression();
-            this.consume(TokenType.WITH, ['"with"']);
+            this.consume(lexer_js_1.TokenType.WITH, ['"with"']);
             const separator = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextJoin', list, separator, target: target.value };
         }
-        if (this.match(TokenType.REPLACE)) {
+        if (this.match(lexer_js_1.TokenType.REPLACE)) {
             const text = this.expression();
-            this.consume(TokenType.WITH, ['"with"']);
+            this.consume(lexer_js_1.TokenType.WITH, ['"with"']);
             const search = this.expression();
-            this.consume(TokenType.AS, ['"as"']);
+            this.consume(lexer_js_1.TokenType.AS, ['"as"']);
             const replace = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextReplace', text, search, replace, target: target.value };
         }
-        if (this.match(TokenType.LENGTH)) {
+        if (this.match(lexer_js_1.TokenType.LENGTH)) {
             const text = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextLength', text, target: target.value };
         }
-        if (this.match(TokenType.CONTAINS)) {
+        if (this.match(lexer_js_1.TokenType.CONTAINS)) {
             const text = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextContains', text, search: this.expression(), target: target.value };
         }
-        if (this.match(TokenType.STARTS_WITH)) {
+        if (this.match(lexer_js_1.TokenType.STARTS_WITH)) {
             const text = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextStartsWith', text, prefix: this.expression(), target: target.value };
         }
-        if (this.match(TokenType.ENDS_WITH)) {
+        if (this.match(lexer_js_1.TokenType.ENDS_WITH)) {
             const text = this.expression();
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextEndsWith', text, suffix: this.expression(), target: target.value };
         }
-        if (this.match(TokenType.SUBSTRING)) {
+        if (this.match(lexer_js_1.TokenType.SUBSTRING)) {
             const text = this.expression();
-            this.consume(TokenType.FROM, ['"from"']);
+            this.consume(lexer_js_1.TokenType.FROM, ['"from"']);
             const start = this.expression();
             let end;
-            if (this.match(TokenType.TO)) {
+            if (this.match(lexer_js_1.TokenType.TO)) {
                 end = this.expression();
             }
-            this.consume(TokenType.INTO, ['"into"']);
+            this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
             const target = this.consumeName(['variable name']);
             this.consumeNewline();
             return { type: 'TextSubstring', text, start, end, target: target.value };
         }
-        throw unexpectedToken(this.peek(), ['text operation']);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), ['text operation']);
     }
     mathStatement() {
         const ops = {
@@ -774,20 +778,20 @@ export class Parser {
             'pi': { type: 'MathPi', params: [] },
             'e': { type: 'MathE', params: [] },
         };
-        const opToken = this.consume(TokenType.IDENTIFIER, ['math operation']);
+        const opToken = this.consume(lexer_js_1.TokenType.IDENTIFIER, ['math operation']);
         const op = ops[opToken.value.toLowerCase()];
         if (!op)
-            throw unexpectedToken(opToken, Object.keys(ops));
+            throw (0, errors_js_1.unexpectedToken)(opToken, Object.keys(ops));
         const args = [];
-        if (!this.check(TokenType.INTO)) {
+        if (!this.check(lexer_js_1.TokenType.INTO)) {
             for (const param of op.params) {
                 args.push(this.expression());
                 if (param !== op.params[op.params.length - 1]) {
-                    this.consume(TokenType.COMMA, ['","']);
+                    this.consume(lexer_js_1.TokenType.COMMA, ['","']);
                 }
             }
         }
-        this.consume(TokenType.INTO, ['"into"']);
+        this.consume(lexer_js_1.TokenType.INTO, ['"into"']);
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
         const stmt = { type: op.type, target: target.value };
@@ -795,9 +799,9 @@ export class Parser {
         return stmt;
     }
     methodCallStatement() {
-        const objToken = this.consume(TokenType.IDENTIFIER, ['list name']);
-        this.consume(TokenType.DOT, ['"."']);
-        const methodToken = this.consume(TokenType.IDENTIFIER, ['method name']);
+        const objToken = this.consume(lexer_js_1.TokenType.IDENTIFIER, ['list name']);
+        this.consume(lexer_js_1.TokenType.DOT, ['"."']);
+        const methodToken = this.consume(lexer_js_1.TokenType.IDENTIFIER, ['method name']);
         const method = methodToken.value;
         // List methods
         const listMethods = {
@@ -816,26 +820,26 @@ export class Parser {
             const args = [];
             // Optional parentheses - support both "obj.method(args)" and "obj.method args"
             let hasParens = false;
-            if (this.match(TokenType.LPAREN)) {
+            if (this.match(lexer_js_1.TokenType.LPAREN)) {
                 hasParens = true;
-                if (!this.check(TokenType.RPAREN)) {
+                if (!this.check(lexer_js_1.TokenType.RPAREN)) {
                     do {
                         args.push(this.expression());
-                    } while (this.match(TokenType.COMMA));
+                    } while (this.match(lexer_js_1.TokenType.COMMA));
                 }
-                this.consume(TokenType.RPAREN, ['")"']);
+                this.consume(lexer_js_1.TokenType.RPAREN, ['")"']);
             }
             else if (info.params.length > 1 || (info.params.length === 1 && info.params[0] !== 'list')) {
                 // Parse space-separated argument (e.g., "list.push 6")
-                while (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF) &&
-                    !this.check(TokenType.INTO) && !this.check(TokenType.END)) {
+                while (!this.check(lexer_js_1.TokenType.NEWLINE) && !this.check(lexer_js_1.TokenType.EOF) &&
+                    !this.check(lexer_js_1.TokenType.INTO) && !this.check(lexer_js_1.TokenType.END)) {
                     args.push(this.expression());
                     if (args.length >= info.params.length - 1)
                         break;
                 }
             }
             let target;
-            if (this.match(TokenType.INTO)) {
+            if (this.match(lexer_js_1.TokenType.INTO)) {
                 const targetToken = this.consumeName(['variable name']);
                 target = targetToken.value;
             }
@@ -843,38 +847,38 @@ export class Parser {
             // Build identifier expression for the list
             const listExpr = { type: 'Identifier', name: objToken.value };
             const stmt = { type: info.type };
-            info.params.forEach((param, i) => {
-                if (param === 'list') {
-                    stmt[param] = listExpr;
-                }
-                else {
-                    stmt[param] = args[i] || listExpr;
-                }
+            // Filter out the 'list' param to get the arg-only params
+            const argParams = info.params.filter(p => p !== 'list');
+            // stmt.list = listExpr (the list)
+            stmt.list = listExpr;
+            // The remaining args map to argParams in order
+            argParams.forEach((param, i) => {
+                stmt[param] = args[i] || listExpr;
             });
             if (target)
                 stmt.target = target;
             return stmt;
         }
         // Dict methods would go here
-        throw new SimpleError(`Unknown method "${method}".`, methodToken.line, methodToken.column);
+        throw new errors_js_1.SimpleError(`Unknown method "${method}".`, methodToken.line, methodToken.column);
     }
     // Handle "list.method args" syntax without dot (e.g., "numbers.push 6", "nums.contains 4")
     spaceDelimMethodCall() {
-        const objToken = this.consume(TokenType.IDENTIFIER, ['list name']);
+        const objToken = this.consume(lexer_js_1.TokenType.IDENTIFIER, ['list name']);
         const listName = objToken.value;
         // Get the method name (could be IDENTIFIER or keyword)
         let methodName;
-        if (this.check(TokenType.IDENTIFIER)) {
+        if (this.check(lexer_js_1.TokenType.IDENTIFIER)) {
             methodName = this.advance().value;
         }
-        else if (this.match(TokenType.LENGTH)) {
+        else if (this.match(lexer_js_1.TokenType.LENGTH)) {
             methodName = 'length';
         }
-        else if (this.match(TokenType.CONTAINS)) {
+        else if (this.match(lexer_js_1.TokenType.CONTAINS)) {
             methodName = 'contains';
         }
         else {
-            throw unexpectedToken(this.peek(), ['method name']);
+            throw (0, errors_js_1.unexpectedToken)(this.peek(), ['method name']);
         }
         const listMethods = {
             'push': { type: 'ListPush', params: ['list', 'value'] },
@@ -889,17 +893,17 @@ export class Parser {
         };
         const info = listMethods[methodName.toLowerCase()];
         if (!info) {
-            throw unexpectedToken(this.peek(), Object.keys(listMethods));
+            throw (0, errors_js_1.unexpectedToken)(this.peek(), Object.keys(listMethods));
         }
         // Parse arguments (exclude "into" which is for the target)
         const args = [];
-        while (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF) &&
-            !this.check(TokenType.INTO) && !this.check(TokenType.END)) {
+        while (!this.check(lexer_js_1.TokenType.NEWLINE) && !this.check(lexer_js_1.TokenType.EOF) &&
+            !this.check(lexer_js_1.TokenType.INTO) && !this.check(lexer_js_1.TokenType.END)) {
             args.push(this.expression());
             break; // Only one arg for now
         }
         let target;
-        if (this.match(TokenType.INTO)) {
+        if (this.match(lexer_js_1.TokenType.INTO)) {
             target = this.consumeName(['variable name']).value;
         }
         this.consumeNewline();
@@ -928,7 +932,7 @@ export class Parser {
     }
     logicalOr() {
         let expr = this.logicalAnd();
-        while (this.match(TokenType.OR)) {
+        while (this.match(lexer_js_1.TokenType.OR)) {
             const operator = this.previous().type;
             const right = this.logicalAnd();
             expr = { type: 'Binary', left: expr, operator, right };
@@ -937,7 +941,7 @@ export class Parser {
     }
     logicalAnd() {
         let expr = this.equality();
-        while (this.match(TokenType.AND)) {
+        while (this.match(lexer_js_1.TokenType.AND)) {
             const operator = this.previous().type;
             const right = this.equality();
             expr = { type: 'Binary', left: expr, operator, right };
@@ -946,13 +950,13 @@ export class Parser {
     }
     equality() {
         let expr = this.comparison();
-        while (this.match(TokenType.IS, TokenType.IS_NOT)) {
+        while (this.match(lexer_js_1.TokenType.IS, lexer_js_1.TokenType.IS_NOT)) {
             // Check if this is a comparison phrase like "is greater than", "is less than"
-            if (this.check(TokenType.GREATER_THAN) || this.check(TokenType.LESS_THAN) ||
-                this.check(TokenType.GREATER_EQUAL) || this.check(TokenType.LESS_EQUAL)) {
+            if (this.check(lexer_js_1.TokenType.GREATER_THAN) || this.check(lexer_js_1.TokenType.LESS_THAN) ||
+                this.check(lexer_js_1.TokenType.GREATER_EQUAL) || this.check(lexer_js_1.TokenType.LESS_EQUAL)) {
                 const operator = this.advance().type; // consume GREATER_THAN, LESS_THAN, etc.
                 // Optional "to" after comparison operators
-                this.match(TokenType.TO);
+                this.match(lexer_js_1.TokenType.TO);
                 const right = this.comparison();
                 expr = { type: 'Binary', left: expr, operator, right };
             }
@@ -966,7 +970,7 @@ export class Parser {
     }
     comparison() {
         let expr = this.term();
-        while (this.match(TokenType.GREATER_THAN, TokenType.LESS_THAN, TokenType.GREATER_EQUAL, TokenType.LESS_EQUAL)) {
+        while (this.match(lexer_js_1.TokenType.GREATER_THAN, lexer_js_1.TokenType.LESS_THAN, lexer_js_1.TokenType.GREATER_EQUAL, lexer_js_1.TokenType.LESS_EQUAL)) {
             const operator = this.previous().type;
             const right = this.term();
             expr = { type: 'Binary', left: expr, operator, right };
@@ -975,7 +979,7 @@ export class Parser {
     }
     term() {
         let expr = this.factor();
-        while (this.match(TokenType.PLUS, TokenType.MINUS)) {
+        while (this.match(lexer_js_1.TokenType.PLUS, lexer_js_1.TokenType.MINUS)) {
             const operator = this.previous().type;
             const right = this.factor();
             expr = { type: 'Binary', left: expr, operator, right };
@@ -984,7 +988,7 @@ export class Parser {
     }
     factor() {
         let expr = this.unary();
-        while (this.match(TokenType.MULTIPLY, TokenType.DIVIDED_BY, TokenType.MOD)) {
+        while (this.match(lexer_js_1.TokenType.MULTIPLY, lexer_js_1.TokenType.DIVIDED_BY, lexer_js_1.TokenType.MOD)) {
             const operator = this.previous().type;
             const right = this.unary();
             expr = { type: 'Binary', left: expr, operator, right };
@@ -992,7 +996,7 @@ export class Parser {
         return expr;
     }
     unary() {
-        if (this.match(TokenType.NOT, TokenType.MINUS)) {
+        if (this.match(lexer_js_1.TokenType.NOT, lexer_js_1.TokenType.MINUS)) {
             const operator = this.previous().type;
             const operand = this.unary();
             return { type: 'Unary', operator, operand };
@@ -1003,7 +1007,7 @@ export class Parser {
         let expr = this.primary();
         let canCall = expr.type === 'Identifier' || expr.type === 'Call';
         while (true) {
-            if (this.match(TokenType.LPAREN)) {
+            if (this.match(lexer_js_1.TokenType.LPAREN)) {
                 if (!canCall) {
                     // This is a grouping parenthesis, not a function call
                     // Put the token back and return the expression
@@ -1011,113 +1015,113 @@ export class Parser {
                     return expr;
                 }
                 const args = [];
-                if (!this.check(TokenType.RPAREN)) {
+                if (!this.check(lexer_js_1.TokenType.RPAREN)) {
                     do {
                         args.push(this.expression());
-                    } while (this.match(TokenType.COMMA));
+                    } while (this.match(lexer_js_1.TokenType.COMMA));
                 }
-                this.consume(TokenType.RPAREN, ['")"']);
+                this.consume(lexer_js_1.TokenType.RPAREN, ['")"']);
                 expr = { type: 'Call', callee: expr, args };
                 canCall = true; // chained calls are allowed
             }
-            else if (this.match(TokenType.LBRACKET)) {
+            else if (this.match(lexer_js_1.TokenType.LBRACKET)) {
                 const index = this.expression();
-                this.consume(TokenType.RBRACKET, ['"]"']);
+                this.consume(lexer_js_1.TokenType.RBRACKET, ['"]"']);
                 expr = { type: 'Index', object: expr, index };
                 canCall = false;
             }
-            else if (this.match(TokenType.DOT)) {
+            else if (this.match(lexer_js_1.TokenType.DOT)) {
                 // Accept identifier or keyword as property name (for things like .length, .push, .int, etc.)
                 let propertyName;
-                if (this.check(TokenType.IDENTIFIER)) {
-                    propertyName = this.consume(TokenType.IDENTIFIER, ['property name']).value;
+                if (this.check(lexer_js_1.TokenType.IDENTIFIER)) {
+                    propertyName = this.consume(lexer_js_1.TokenType.IDENTIFIER, ['property name']).value;
                 }
-                else if (this.match(TokenType.LENGTH)) {
+                else if (this.match(lexer_js_1.TokenType.LENGTH)) {
                     propertyName = 'length';
                 }
-                else if (this.match(TokenType.INT)) {
+                else if (this.match(lexer_js_1.TokenType.INT)) {
                     propertyName = 'int';
                 }
-                else if (this.match(TokenType.FLOAT)) {
+                else if (this.match(lexer_js_1.TokenType.FLOAT)) {
                     propertyName = 'float';
                 }
-                else if (this.match(TokenType.CHOICE)) {
+                else if (this.match(lexer_js_1.TokenType.CHOICE)) {
                     propertyName = 'choice';
                 }
-                else if (this.match(TokenType.SHUFFLE)) {
+                else if (this.match(lexer_js_1.TokenType.SHUFFLE)) {
                     propertyName = 'shuffle';
                 }
-                else if (this.match(TokenType.BOOL)) {
+                else if (this.match(lexer_js_1.TokenType.BOOL)) {
                     propertyName = 'bool';
                 }
-                else if (this.match(TokenType.CONTAINS)) {
+                else if (this.match(lexer_js_1.TokenType.CONTAINS)) {
                     propertyName = 'contains';
                 }
-                else if (this.match(TokenType.UPPER)) {
+                else if (this.match(lexer_js_1.TokenType.UPPER)) {
                     propertyName = 'upper';
                 }
-                else if (this.match(TokenType.LOWER)) {
+                else if (this.match(lexer_js_1.TokenType.LOWER)) {
                     propertyName = 'lower';
                 }
-                else if (this.match(TokenType.TRIM)) {
+                else if (this.match(lexer_js_1.TokenType.TRIM)) {
                     propertyName = 'trim';
                 }
-                else if (this.match(TokenType.SPLIT)) {
+                else if (this.match(lexer_js_1.TokenType.SPLIT)) {
                     propertyName = 'split';
                 }
-                else if (this.match(TokenType.JOIN)) {
+                else if (this.match(lexer_js_1.TokenType.JOIN)) {
                     propertyName = 'join';
                 }
-                else if (this.match(TokenType.REPLACE)) {
+                else if (this.match(lexer_js_1.TokenType.REPLACE)) {
                     propertyName = 'replace';
                 }
-                else if (this.match(TokenType.SUBSTRING)) {
+                else if (this.match(lexer_js_1.TokenType.SUBSTRING)) {
                     propertyName = 'substring';
                 }
-                else if (this.match(TokenType.STARTS_WITH)) {
+                else if (this.match(lexer_js_1.TokenType.STARTS_WITH)) {
                     propertyName = 'startsWith';
                 }
-                else if (this.match(TokenType.ENDS_WITH)) {
+                else if (this.match(lexer_js_1.TokenType.ENDS_WITH)) {
                     propertyName = 'endsWith';
                 }
-                else if (this.match(TokenType.ABS)) {
+                else if (this.match(lexer_js_1.TokenType.ABS)) {
                     propertyName = 'abs';
                 }
-                else if (this.match(TokenType.ROUND)) {
+                else if (this.match(lexer_js_1.TokenType.ROUND)) {
                     propertyName = 'round';
                 }
-                else if (this.match(TokenType.FLOOR)) {
+                else if (this.match(lexer_js_1.TokenType.FLOOR)) {
                     propertyName = 'floor';
                 }
-                else if (this.match(TokenType.CEIL)) {
+                else if (this.match(lexer_js_1.TokenType.CEIL)) {
                     propertyName = 'ceil';
                 }
-                else if (this.match(TokenType.SQRT)) {
+                else if (this.match(lexer_js_1.TokenType.SQRT)) {
                     propertyName = 'sqrt';
                 }
-                else if (this.match(TokenType.POW)) {
+                else if (this.match(lexer_js_1.TokenType.POW)) {
                     propertyName = 'pow';
                 }
-                else if (this.match(TokenType.MIN)) {
+                else if (this.match(lexer_js_1.TokenType.MIN)) {
                     propertyName = 'min';
                 }
-                else if (this.match(TokenType.MAX)) {
+                else if (this.match(lexer_js_1.TokenType.MAX)) {
                     propertyName = 'max';
                 }
-                else if (this.match(TokenType.CLAMP)) {
+                else if (this.match(lexer_js_1.TokenType.CLAMP)) {
                     propertyName = 'clamp';
                 }
-                else if (this.match(TokenType.RANDOM)) {
+                else if (this.match(lexer_js_1.TokenType.RANDOM)) {
                     propertyName = 'random';
                 }
-                else if (this.match(TokenType.PI)) {
+                else if (this.match(lexer_js_1.TokenType.PI)) {
                     propertyName = 'pi';
                 }
-                else if (this.match(TokenType.E)) {
+                else if (this.match(lexer_js_1.TokenType.E)) {
                     propertyName = 'e';
                 }
                 else {
-                    throw unexpectedToken(this.peek(), ['property name']);
+                    throw (0, errors_js_1.unexpectedToken)(this.peek(), ['property name']);
                 }
                 expr = { type: 'Property', object: expr, property: propertyName };
                 canCall = true; // allow it to be called as a method (e.g., random.int)
@@ -1139,72 +1143,83 @@ export class Parser {
     }
     primary() {
         // Call function expression: call name with args
-        if (this.match(TokenType.CALL)) {
+        if (this.match(lexer_js_1.TokenType.CALL)) {
             const nameToken = this.consumeName(['function name']);
             const args = [];
-            if (this.match(TokenType.WITH)) {
+            if (this.match(lexer_js_1.TokenType.WITH)) {
                 do {
                     args.push(this.expression());
-                } while (this.match(TokenType.COMMA));
+                } while (this.match(lexer_js_1.TokenType.COMMA));
             }
             return { type: 'Call', callee: { type: 'Identifier', name: nameToken.value }, args };
         }
         // Literals
-        if (this.match(TokenType.STRING)) {
+        if (this.match(lexer_js_1.TokenType.STRING)) {
             return { type: 'Literal', value: this.previous().value };
         }
-        if (this.match(TokenType.NUMBER)) {
+        if (this.match(lexer_js_1.TokenType.NUMBER)) {
             return { type: 'Literal', value: parseFloat(this.previous().value) };
         }
-        if (this.match(TokenType.BOOLEAN)) {
+        if (this.match(lexer_js_1.TokenType.BOOLEAN)) {
             return { type: 'Literal', value: this.previous().value === 'true' };
         }
         // List literal
-        if (this.match(TokenType.LBRACKET)) {
+        if (this.match(lexer_js_1.TokenType.LBRACKET)) {
             const elements = [];
-            if (!this.check(TokenType.RBRACKET)) {
+            // Consume newlines after the opening bracket
+            this.match(lexer_js_1.TokenType.NEWLINE);
+            if (!this.check(lexer_js_1.TokenType.RBRACKET)) {
                 do {
+                    this.consumeNewline();
+                    if (this.check(lexer_js_1.TokenType.RBRACKET))
+                        break;
                     elements.push(this.expression());
-                } while (this.match(TokenType.COMMA));
+                    this.match(lexer_js_1.TokenType.NEWLINE); // Consume newline after element
+                } while (this.match(lexer_js_1.TokenType.COMMA));
             }
-            this.consume(TokenType.RBRACKET, ['"]"']);
+            this.consume(lexer_js_1.TokenType.RBRACKET, ['"]"']);
             return { type: 'List', elements };
         }
         // Dict literal
-        if (this.match(TokenType.LBRACE)) {
+        if (this.match(lexer_js_1.TokenType.LBRACE)) {
             const entries = [];
-            if (!this.check(TokenType.RBRACE)) {
+            this.match(lexer_js_1.TokenType.NEWLINE);
+            if (!this.check(lexer_js_1.TokenType.RBRACE)) {
                 do {
-                    const keyToken = this.consume(TokenType.IDENTIFIER, ['key name']);
-                    this.consume(TokenType.COLON, ['":"']);
+                    this.consumeNewline();
+                    if (this.check(lexer_js_1.TokenType.RBRACE))
+                        break;
+                    const keyToken = this.consumeName(['key name']);
+                    this.consume(lexer_js_1.TokenType.COLON, ['":"']);
                     const value = this.expression();
                     entries.push({ key: keyToken.value, value });
-                } while (this.match(TokenType.COMMA));
+                    this.match(lexer_js_1.TokenType.NEWLINE);
+                } while (this.match(lexer_js_1.TokenType.COMMA));
             }
-            this.consume(TokenType.RBRACE, ['"}"']);
+            this.consume(lexer_js_1.TokenType.RBRACE, ['"}"']);
             return { type: 'Dict', entries };
         }
         // Grouping
-        if (this.match(TokenType.LPAREN)) {
+        if (this.match(lexer_js_1.TokenType.LPAREN)) {
             const expr = this.expression();
-            this.consume(TokenType.RPAREN, ['")"']);
+            this.consume(lexer_js_1.TokenType.RPAREN, ['")"']);
             return expr;
         }
         // Identifier
-        if (this.match(TokenType.IDENTIFIER)) {
+        if (this.match(lexer_js_1.TokenType.IDENTIFIER)) {
             return { type: 'Identifier', name: this.previous().value };
         }
         // Accept any keyword as an identifier (for variables/functions named like keywords)
         const token = this.peek();
-        if (token.type !== TokenType.EOF && token.type !== TokenType.NEWLINE &&
-            token.type !== TokenType.COMMENT && token.value &&
-            token.type !== TokenType.RPAREN && token.type !== TokenType.RBRACKET &&
-            token.type !== TokenType.RBRACE && token.type !== TokenType.COMMA &&
-            token.type !== TokenType.COLON && token.type !== TokenType.DOT) {
+        if (token.type !== lexer_js_1.TokenType.EOF && token.type !== lexer_js_1.TokenType.NEWLINE &&
+            token.type !== lexer_js_1.TokenType.COMMENT && token.value &&
+            token.type !== lexer_js_1.TokenType.RPAREN && token.type !== lexer_js_1.TokenType.RBRACKET &&
+            token.type !== lexer_js_1.TokenType.RBRACE && token.type !== lexer_js_1.TokenType.COMMA &&
+            token.type !== lexer_js_1.TokenType.COLON && token.type !== lexer_js_1.TokenType.DOT) {
             this.advance();
             return { type: 'Identifier', name: token.value };
         }
-        throw unexpectedToken(this.peek(), ['expression']);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), ['expression']);
     }
     // Utility methods
     match(...types) {
@@ -1218,7 +1233,7 @@ export class Parser {
     }
     check(type) {
         if (this.isAtEnd())
-            return type === TokenType.EOF;
+            return type === lexer_js_1.TokenType.EOF;
         return this.peek().type === type;
     }
     advance() {
@@ -1227,7 +1242,7 @@ export class Parser {
         return this.previous();
     }
     isAtEnd() {
-        return this.peek().type === TokenType.EOF;
+        return this.peek().type === lexer_js_1.TokenType.EOF;
     }
     peek(offset = 0) {
         return this.tokens[this.current + offset];
@@ -1238,23 +1253,24 @@ export class Parser {
     consume(type, expected) {
         if (this.check(type))
             return this.advance();
-        throw unexpectedToken(this.peek(), expected);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), expected);
     }
     // Accept identifier or keyword as a name (for variable/function names that collide with keywords)
     consumeName(expected) {
-        if (this.check(TokenType.IDENTIFIER))
+        if (this.check(lexer_js_1.TokenType.IDENTIFIER))
             return this.advance();
         // Accept any keyword token as a name
         const token = this.peek();
-        if (token.type !== TokenType.EOF && token.type !== TokenType.NEWLINE &&
-            token.type !== TokenType.COMMENT && token.value) {
+        if (token.type !== lexer_js_1.TokenType.EOF && token.type !== lexer_js_1.TokenType.NEWLINE &&
+            token.type !== lexer_js_1.TokenType.COMMENT && token.value) {
             return this.advance();
         }
-        throw unexpectedToken(this.peek(), expected);
+        throw (0, errors_js_1.unexpectedToken)(this.peek(), expected);
     }
     consumeNewline() {
-        while (this.check(TokenType.NEWLINE))
+        while (this.check(lexer_js_1.TokenType.NEWLINE))
             this.advance();
     }
 }
+exports.Parser = Parser;
 //# sourceMappingURL=parser.js.map

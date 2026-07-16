@@ -1,3 +1,26 @@
+declare const Parser: any;
+declare const Interpreter: any;
+declare const formatError: any;
+declare const readFileSync: any, writeFileSync: any, existsSync: any, mkdirSync: any, readdirSync: any, copyFileSync: any;
+declare const join: any, dirname: any, basename: any;
+declare const execSync: any;
+declare const readline: any;
+declare function getExamplesDir(): string;
+declare const EXAMPLES_DIR: string;
+declare const INSTALL_DIR: any;
+declare const BIN_DIR: any;
+declare const INSTALLED_EXE: any;
+declare const VERSION = "1.5.0";
+declare function isInstalledVersion(): boolean;
+declare function isInPath(): boolean;
+declare function showWelcomeAndInstall(): Promise<boolean>;
+declare function installSimple(): Promise<boolean>;
+declare function runInstalledVersion(args: string[]): void;
+declare function runFile(filePath: string, args?: string[]): Promise<void>;
+declare function buildFile(inputPath: string, outputPath?: string): Promise<void>;
+declare function newProject(name: string): void;
+declare function listExamples(): void;
+declare function runExample(name: string): Promise<void>;
+declare function showHelp(): void;
 declare function main(): Promise<void>;
-export { main };
 //# sourceMappingURL=index.d.ts.map

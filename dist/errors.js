@@ -1,5 +1,19 @@
-import { TokenType } from './lexer.js';
-export class SimpleError extends Error {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SimpleError = void 0;
+exports.formatError = formatError;
+exports.unexpectedToken = unexpectedToken;
+exports.undefinedIdentifier = undefinedIdentifier;
+exports.typeMismatch = typeMismatch;
+exports.wrongArgCount = wrongArgCount;
+exports.notCallable = notCallable;
+exports.divisionByZero = divisionByZero;
+exports.indexOutOfBounds = indexOutOfBounds;
+exports.keyNotFound = keyNotFound;
+exports.fileNotFound = fileNotFound;
+exports.ioError = ioError;
+const lexer_js_1 = require("./lexer.js");
+class SimpleError extends Error {
     line;
     column;
     sourceLine;
@@ -16,25 +30,28 @@ export class SimpleError extends Error {
         return new SimpleError(message, token.line, token.column, '', suggestion);
     }
     toString(source) {
+        const col = Math.max(0, this.column - 1);
         let result = `Error at line ${this.line}, column ${this.column}: ${this.message}`;
         if (this.suggestion) {
             result += `\nSuggestion: ${this.suggestion}`;
         }
         if (source && this.sourceLine) {
-            const pointer = ' '.repeat(this.column - 1) + '^';
+            const pointer = ' '.repeat(col) + '^';
             result += `\n${this.sourceLine}\n${pointer}`;
         }
         else if (this.sourceLine) {
-            const pointer = ' '.repeat(this.column - 1) + '^';
+            const pointer = ' '.repeat(col) + '^';
             result += `\n${this.sourceLine}\n${pointer}`;
         }
         return result;
     }
 }
-export function formatError(error, source) {
+exports.SimpleError = SimpleError;
+function formatError(error, source) {
     const lines = source?.split('\n') || [];
     const sourceLine = lines[error.line - 1] || error.sourceLine;
-    const pointer = ' '.repeat(error.column - 1) + '^';
+    const col = Math.max(0, error.column - 1);
+    const pointer = ' '.repeat(col) + '^';
     let msg = `I ran into a problem at line ${error.line}, column ${error.column}:\n`;
     msg += `${error.message}\n`;
     if (sourceLine) {
@@ -45,35 +62,35 @@ export function formatError(error, source) {
     }
     return msg;
 }
-export function unexpectedToken(token, expected) {
-    const got = token.type === TokenType.EOF ? 'end of file' : `"${token.value}"`;
+function unexpectedToken(token, expected) {
+    const got = token.type === lexer_js_1.TokenType.EOF ? 'end of file' : `"${token.value}"`;
     return new SimpleError(`I expected ${expected.join(' or ')} but got ${got}.`, token.line, token.column, '', `Try adding ${expected[0].toLowerCase()} here.`);
 }
-export function undefinedIdentifier(token, name) {
+function undefinedIdentifier(token, name) {
     return new SimpleError(`I couldn't find anything named "${name}".`, token.line, token.column, '', `Check spelling or make sure you used "remember ${name} as ..." first.`);
 }
-export function typeMismatch(token, expected, got) {
+function typeMismatch(token, expected, got) {
     return new SimpleError(`I expected a ${expected} but got a ${got}.`, token.line, token.column, '', `Make sure you're using the right type of value here.`);
 }
-export function wrongArgCount(token, name, expected, got) {
+function wrongArgCount(token, name, expected, got) {
     return new SimpleError(`Function "${name}" expects ${expected} argument${expected !== 1 ? 's' : ''} but got ${got}.`, token.line, token.column, '', `Check the function definition and call it with the right number of values.`);
 }
-export function notCallable(token, name) {
+function notCallable(token, name) {
     return new SimpleError(`"${name}" is not a function and cannot be called.`, token.line, token.column, '', `Did you mean to use it as a value instead?`);
 }
-export function divisionByZero(token) {
+function divisionByZero(token) {
     return new SimpleError(`Cannot divide by zero.`, token.line, token.column, '', `Check that the divisor is not zero before dividing.`);
 }
-export function indexOutOfBounds(token, index, length) {
+function indexOutOfBounds(token, index, length) {
     return new SimpleError(`List index ${index} is out of bounds (list has ${length} items).`, token.line, token.column, '', `Valid indices are 0 to ${length - 1}.`);
 }
-export function keyNotFound(token, key) {
+function keyNotFound(token, key) {
     return new SimpleError(`No key "${key}" found in this dictionary.`, token.line, token.column, '', `Check the spelling or use "contains" to check first.`);
 }
-export function fileNotFound(token, path) {
+function fileNotFound(token, path) {
     return new SimpleError(`File "${path}" does not exist.`, token.line, token.column, '', `Check the path or use "exists" to verify first.`);
 }
-export function ioError(token, operation, message) {
+function ioError(token, operation, message) {
     return new SimpleError(`Could not ${operation}: ${message}`, token.line, token.column, '', `Check permissions and that the path is valid.`);
 }
 //# sourceMappingURL=errors.js.map

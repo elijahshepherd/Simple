@@ -1,11 +1,50 @@
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.stdlib = void 0;
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+const os_1 = __importDefault(require("os"));
 const consoleModule = {
     functions: {
         say: { arity: 1, impl: (_i, args) => { console.log(args[0]); return null; } },
         ask: { arity: 1, impl: async (_i, args) => {
-                const readline = await import('readline/promises');
+                const readline = await Promise.resolve().then(() => __importStar(require('readline/promises')));
                 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
                 const answer = await rl.question(String(args[0]));
                 rl.close();
@@ -17,55 +56,55 @@ const consoleModule = {
 };
 const filesModule = {
     functions: {
-        create: { arity: 1, impl: (_i, args) => { fs.writeFileSync(String(args[0]), ''); return true; } },
+        create: { arity: 1, impl: (_i, args) => { fs_1.default.writeFileSync(String(args[0]), ''); return true; } },
         delete: { arity: 1, impl: (_i, args) => {
                 const p = String(args[0]);
-                if (fs.existsSync(p)) {
-                    fs.unlinkSync(p);
+                if (fs_1.default.existsSync(p)) {
+                    fs_1.default.unlinkSync(p);
                     return true;
                 }
                 return false;
             } },
-        write: { arity: 2, impl: (_i, args) => { fs.writeFileSync(String(args[0]), String(args[1])); return true; } },
-        append: { arity: 2, impl: (_i, args) => { fs.appendFileSync(String(args[0]), String(args[1])); return true; } },
+        write: { arity: 2, impl: (_i, args) => { fs_1.default.writeFileSync(String(args[0]), String(args[1])); return true; } },
+        append: { arity: 2, impl: (_i, args) => { fs_1.default.appendFileSync(String(args[0]), String(args[1])); return true; } },
         read: { arity: 1, impl: (_i, args) => {
                 const p = String(args[0]);
-                if (!fs.existsSync(p))
+                if (!fs_1.default.existsSync(p))
                     throw new Error(`File not found: ${p}`);
-                return fs.readFileSync(p, 'utf8');
+                return fs_1.default.readFileSync(p, 'utf8');
             } },
-        exists: { arity: 1, impl: (_i, args) => fs.existsSync(String(args[0])) },
-        copy: { arity: 2, impl: (_i, args) => { fs.copyFileSync(String(args[0]), String(args[1])); return true; } },
-        move: { arity: 2, impl: (_i, args) => { fs.renameSync(String(args[0]), String(args[1])); return true; } },
-        rename: { arity: 2, impl: (_i, args) => { fs.renameSync(String(args[0]), String(args[1])); return true; } },
-        dir: { arity: 1, impl: (_i, args) => path.dirname(String(args[0])) },
-        name: { arity: 1, impl: (_i, args) => path.basename(String(args[0])) },
-        ext: { arity: 1, impl: (_i, args) => path.extname(String(args[0])) },
-        join: { arity: -1, impl: (_i, args) => path.join(...args.map(String)) },
+        exists: { arity: 1, impl: (_i, args) => fs_1.default.existsSync(String(args[0])) },
+        copy: { arity: 2, impl: (_i, args) => { fs_1.default.copyFileSync(String(args[0]), String(args[1])); return true; } },
+        move: { arity: 2, impl: (_i, args) => { fs_1.default.renameSync(String(args[0]), String(args[1])); return true; } },
+        rename: { arity: 2, impl: (_i, args) => { fs_1.default.renameSync(String(args[0]), String(args[1])); return true; } },
+        dir: { arity: 1, impl: (_i, args) => path_1.default.dirname(String(args[0])) },
+        name: { arity: 1, impl: (_i, args) => path_1.default.basename(String(args[0])) },
+        ext: { arity: 1, impl: (_i, args) => path_1.default.extname(String(args[0])) },
+        join: { arity: -1, impl: (_i, args) => path_1.default.join(...args.map(String)) },
         cwd: { arity: 0, impl: () => process.cwd() },
     },
 };
 const foldersModule = {
     functions: {
-        create: { arity: 1, impl: (_i, args) => { fs.mkdirSync(String(args[0]), { recursive: true }); return true; } },
+        create: { arity: 1, impl: (_i, args) => { fs_1.default.mkdirSync(String(args[0]), { recursive: true }); return true; } },
         delete: { arity: 1, impl: (_i, args) => {
                 const p = String(args[0]);
-                if (fs.existsSync(p)) {
-                    fs.rmSync(p, { recursive: true });
+                if (fs_1.default.existsSync(p)) {
+                    fs_1.default.rmSync(p, { recursive: true });
                     return true;
                 }
                 return false;
             } },
         list: { arity: 1, impl: (_i, args) => {
                 const p = String(args[0]);
-                if (!fs.existsSync(p))
+                if (!fs_1.default.existsSync(p))
                     return [];
-                return fs.readdirSync(p);
+                return fs_1.default.readdirSync(p);
             } },
-        exists: { arity: 1, impl: (_i, args) => fs.existsSync(String(args[0])) },
+        exists: { arity: 1, impl: (_i, args) => fs_1.default.existsSync(String(args[0])) },
         cwd: { arity: 0, impl: () => process.cwd() },
-        home: { arity: 0, impl: () => os.homedir() },
-        temp: { arity: 0, impl: () => os.tmpdir() },
+        home: { arity: 0, impl: () => os_1.default.homedir() },
+        temp: { arity: 0, impl: () => os_1.default.tmpdir() },
     },
 };
 const systemModule = {
@@ -75,7 +114,7 @@ const systemModule = {
         envGet: { arity: 1, impl: (_i, args) => process.env[String(args[0])] ?? null },
         envSet: { arity: 2, impl: (_i, args) => { process.env[String(args[0])] = String(args[1]); return true; } },
         run: { arity: 1, impl: async (_i, args) => {
-                const { execSync } = await import('child_process');
+                const { execSync } = await Promise.resolve().then(() => __importStar(require('child_process')));
                 try {
                     return execSync(String(args[0]), { encoding: 'utf8', stdio: 'pipe' }).trim();
                 }
@@ -164,7 +203,7 @@ const mathModule = {
         e: { arity: 0, impl: () => Math.E },
     },
 };
-export const stdlib = {
+exports.stdlib = {
     console: consoleModule,
     files: filesModule,
     folders: foldersModule,

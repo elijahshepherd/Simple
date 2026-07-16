@@ -1,7 +1,7 @@
 {
   "name": "simple",
-  "version": "1.0.0",
-  "description": "Simple 1.0 - Beginner-friendly programming language with natural English syntax",
+  "version": "1.5.0",
+  "description": "Simple 1.5 - Beginner-friendly programming language with natural English syntax. Standalone executable with Windows installer.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -22,7 +22,8 @@
     "language",
     "beginner",
     "english",
-    "education"
+    "education",
+    "standalone"
   ],
   "author": "Elijah Shepherd",
   "license": "MIT",
