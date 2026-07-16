@@ -48,12 +48,12 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use a fixed delimiter that won't appear in markdown content
-          DELIMITER="SIMPLE_RELEASE_END_OF_CONTENT_MARKER_12345"
-          
-          echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
-          cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "${DELIMITER}" >> $GITHUB_OUTPUT
+          # Use a temp file approach to avoid delimiter issues
+          TMPFILE=$(mktemp)
+          cat "${{ steps.find_version.outputs.VERSION_FILE }}" > "$TMPFILE"
+          # Use GitHub's file output command
+          echo "content=$(cat "$TMPFILE" | sed ':a;N;$!ba;s/\n/%0A/g' | sed 's/%/%25/g')" >> $GITHUB_OUTPUT
+          rm "$TMPFILE"
 
       - name: Run basic test
         run: |
