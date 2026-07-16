@@ -903,7 +903,7 @@ export class Parser {
   }
 
   private methodCallStatement(): Stmt {
-    const obj = this.expression();
+    const objToken = this.consume(TokenType.IDENTIFIER, ['list name']);
     this.consume(TokenType.DOT, ['"."']);
     const methodToken = this.consume(TokenType.IDENTIFIER, ['method name']);
     const method = methodToken.value;
@@ -923,13 +923,24 @@ export class Parser {
     if (listMethods[method]) {
       const info = listMethods[method];
       const args: Expr[] = [];
-      this.consume(TokenType.LPAREN, ['"("']);
-      if (!this.check(TokenType.RPAREN)) {
-        do {
+      // Optional parentheses - support both "obj.method(args)" and "obj.method args"
+      let hasParens = false;
+      if (this.match(TokenType.LPAREN)) {
+        hasParens = true;
+        if (!this.check(TokenType.RPAREN)) {
+          do {
+            args.push(this.expression());
+          } while (this.match(TokenType.COMMA));
+        }
+        this.consume(TokenType.RPAREN, ['")"']);
+      } else if (info.params.length > 1 || (info.params.length === 1 && info.params[0] !== 'list')) {
+        // Parse space-separated argument (e.g., "list.push 6")
+        while (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF) &&
+               !this.check(TokenType.INTO) && !this.check(TokenType.END)) {
           args.push(this.expression());
-        } while (this.match(TokenType.COMMA));
+          if (args.length >= info.params.length - 1) break;
+        }
       }
-      this.consume(TokenType.RPAREN, ['")"']);
 
       let target: string | undefined;
       if (this.match(TokenType.INTO)) {
@@ -938,8 +949,17 @@ export class Parser {
       }
       this.consumeNewline();
 
+      // Build identifier expression for the list
+      const listExpr: Expr = { type: 'Identifier', name: objToken.value };
+
       const stmt: any = { type: info.type };
-      info.params.forEach((param, i) => { stmt[param] = args[i]; });
+      info.params.forEach((param, i) => {
+        if (param === 'list') {
+          stmt[param] = listExpr;
+        } else {
+          stmt[param] = args[i] || listExpr;
+        }
+      });
       if (target) stmt.target = target;
       return stmt;
     }
@@ -1143,6 +1163,50 @@ export class Parser {
           propertyName = 'shuffle';
         } else if (this.match(TokenType.BOOL)) {
           propertyName = 'bool';
+        } else if (this.match(TokenType.CONTAINS)) {
+          propertyName = 'contains';
+        } else if (this.match(TokenType.UPPER)) {
+          propertyName = 'upper';
+        } else if (this.match(TokenType.LOWER)) {
+          propertyName = 'lower';
+        } else if (this.match(TokenType.TRIM)) {
+          propertyName = 'trim';
+        } else if (this.match(TokenType.SPLIT)) {
+          propertyName = 'split';
+        } else if (this.match(TokenType.JOIN)) {
+          propertyName = 'join';
+        } else if (this.match(TokenType.REPLACE)) {
+          propertyName = 'replace';
+        } else if (this.match(TokenType.SUBSTRING)) {
+          propertyName = 'substring';
+        } else if (this.match(TokenType.STARTS_WITH)) {
+          propertyName = 'startsWith';
+        } else if (this.match(TokenType.ENDS_WITH)) {
+          propertyName = 'endsWith';
+        } else if (this.match(TokenType.ABS)) {
+          propertyName = 'abs';
+        } else if (this.match(TokenType.ROUND)) {
+          propertyName = 'round';
+        } else if (this.match(TokenType.FLOOR)) {
+          propertyName = 'floor';
+        } else if (this.match(TokenType.CEIL)) {
+          propertyName = 'ceil';
+        } else if (this.match(TokenType.SQRT)) {
+          propertyName = 'sqrt';
+        } else if (this.match(TokenType.POW)) {
+          propertyName = 'pow';
+        } else if (this.match(TokenType.MIN)) {
+          propertyName = 'min';
+        } else if (this.match(TokenType.MAX)) {
+          propertyName = 'max';
+        } else if (this.match(TokenType.CLAMP)) {
+          propertyName = 'clamp';
+        } else if (this.match(TokenType.RANDOM)) {
+          propertyName = 'random';
+        } else if (this.match(TokenType.PI)) {
+          propertyName = 'pi';
+        } else if (this.match(TokenType.E)) {
+          propertyName = 'e';
         } else {
           throw unexpectedToken(this.peek(), ['property name']);
         }
