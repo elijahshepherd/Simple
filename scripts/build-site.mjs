@@ -346,7 +346,6 @@ let html = `<!DOCTYPE html>
   </div>
 
   <script>
-    // Version display
     document.getElementById('version-display').textContent = '1.5.0';
 
     function copy(btn, text) {

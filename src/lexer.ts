@@ -285,7 +285,7 @@ const KEYWORDS: Record<string, TokenType> = {
   'arch': TokenType.ARCH,
 };
 
-// All multi-word keywords, sorted by length (longest first) for greedy matching
+
 const MULTI_WORD_KEYWORDS = [
   'greater than or equal',
   'less than or equal',
@@ -338,7 +338,7 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // Comments
+
     if (ch === '#') {
       let value = '';
       while (peek() !== '\n' && peek() !== '\0') {
@@ -398,26 +398,26 @@ export function lex(source: string): Token[] {
         let bestMatchEndI = savedI;
         let bestMatchEndLine = savedLine;
         let bestMatchEndCol = savedCol;
-        
+
         for (const kw of MULTI_WORD_KEYWORDS) {
           if (kw.startsWith(base.toLowerCase() + ' ')) {
-            // Try to match this keyword using local test variables
+
             const words = kw.split(' ');
             let match = true;
             let testI = savedI;
             let testLine = savedLine;
             let testCol = savedCol;
-            
-            // Already matched base, check remaining words
+
+
             for (let w = 1; w < words.length; w++) {
-              // Skip spaces
+
               while (testI < source.length && source[testI] === ' ') {
                 testCol++;
                 testI++;
               }
               if (testI >= source.length) { match = false; break; }
-              
-              // Check word
+
+
               let word = '';
               while (testI < source.length && /[a-zA-Z_]/.test(source[testI])) {
                 word += source[testI];
@@ -429,7 +429,7 @@ export function lex(source: string): Token[] {
                 break;
               }
             }
-            
+
             if (match && kw.length > bestMatch.length) {
               bestMatch = kw;
               bestMatchEndI = testI;
@@ -438,14 +438,14 @@ export function lex(source: string): Token[] {
             }
           }
         }
-        
+
         if (bestMatch) {
           i = bestMatchEndI;
           line = bestMatchEndLine;
           column = bestMatchEndCol;
           return bestMatch;
         }
-        
+
         i = savedI;
         line = savedLine;
         column = savedCol;

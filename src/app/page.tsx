@@ -73,7 +73,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] transition-colors duration-300">
-      
+
       <AnimatePresence>
         {showRipple && (
           <motion.div
@@ -88,15 +88,15 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
-      
+
       <AnimatePresence>
         {fireworks && <Fireworks />}
       </AnimatePresence>
 
       <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] transition-colors duration-300">
-        
+
         <div className="min-h-screen flex flex-col items-center justify-center px-4 relative">
-          
+
           <AnimatePresence mode="wait">
             {logoVisible && (
               <motion.div
@@ -127,7 +127,7 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <AnimatePresence>
             {mounted && (
               <motion.div
@@ -163,7 +163,7 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <AnimatePresence>
             {mounted && (
               <motion.div
@@ -189,7 +189,7 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <motion.footer
             className="w-full text-center py-12 border-t border-[var(--border)] text-[var(--fg-subtle)] text-sm"
             initial={{ opacity: 0 }}
@@ -209,12 +209,12 @@ export default function Home() {
           </motion.footer>
         </div>
 
-        
+
         <AnimatePresence>
           {fireworks && <FireworksBackground />}
         </AnimatePresence>
 
-        
+
         <AnimatePresence>
           {copied && (
             <motion.div
@@ -406,7 +406,7 @@ function FireworksBackground({ active }: { active: boolean }) {
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt // gravity
+        this.vy += 0.3 * dt
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -448,13 +448,13 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -488,13 +488,13 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -528,13 +528,13 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)

@@ -62,7 +62,7 @@ export function FireworksBackground({ color = 'white', population = 30 }: Firewo
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt // gravity
+        this.vy += 0.3 * dt
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -104,13 +104,13 @@ export function FireworksBackground({ color = 'white', population = 30 }: Firewo
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -135,13 +135,13 @@ export function FireworksBackground({ color = 'white', population = 30 }: Firewo
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -167,7 +167,7 @@ export function FireworksBackground({ color = 'white', population = 30 }: Firewo
   return <canvas className="fixed inset-0 pointer-events-none z-40" ref={canvasRef} />
 }
 
-// Simple fireworks background
+
 export function FireworksBackground({ color = 'white', population = 30 }: { color?: 'white' | 'black'; population?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
@@ -223,7 +223,7 @@ export function FireworksBackground({ color = 'white', population = 30 }: { colo
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt // gravity
+        this.vy += 0.3 * dt
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -265,13 +265,13 @@ export function FireworksBackground({ color = 'white', population = 30 }: { colo
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -305,13 +305,13 @@ export function FireworksBackground({ color = 'white', population = 30 }: { colo
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -337,7 +337,7 @@ export function FireworksBackground({ color = 'white', population = 30 }: { colo
   return <canvas className="fixed inset-0 pointer-events-none z-40" ref={canvasRef} />
 }
 
-// Simple fireworks background
+
 export function FireworksBackground({ color = 'white', population = 30 }: { color?: 'white' | 'black'; population?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
@@ -393,7 +393,7 @@ export function FireworksBackground({ color = 'white', population = 30 }: { colo
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt // gravity
+        this.vy += 0.3 * dt
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -435,13 +435,13 @@ export function FireworksBackground({ color = 'white', population = 30 }: { colo
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -475,13 +475,13 @@ export function FireworksBackground({ color = 'white', population = 30 }: { colo
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
+
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
