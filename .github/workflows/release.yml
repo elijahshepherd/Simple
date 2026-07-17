@@ -48,10 +48,12 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Read content and output as multiline string
-          echo "body<<EOF" >> $GITHUB_OUTPUT
+          # Generate a unique delimiter using random bytes
+          DELIMITER="SIMPLE_RELEASE_$(date +%s%N)_$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
+          
+          echo "body<<${DELIMITER}" >> $GITHUB_OUTPUT
           cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "${DELIMITER}" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
