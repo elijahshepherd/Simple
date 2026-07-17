@@ -14,7 +14,7 @@ const program = parser.parse();
 
 const interpreter = new Interpreter();
 
-// Patch evaluateBinary
+
 const originalEvaluateBinary = interpreter.evaluateBinary.bind(interpreter);
 interpreter.evaluateBinary = async function(expr) {
   console.log('>>> evaluateBinary:', expr.operator, 'left:', expr.left.type, 'right:', expr.right.type);

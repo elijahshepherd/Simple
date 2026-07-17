@@ -2,7 +2,7 @@ import { Parser } from './dist/parser.js';
 
 const source = 'attempts is less than maxAttempts';
 
-// Add debug to the parser
+
 const originalExpression = Parser.prototype.expression;
 Parser.prototype.expression = function() {
   console.log('expression() called, current:', this.peek().type, this.peek().value);

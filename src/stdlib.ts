@@ -15,7 +15,7 @@ export interface StdlibModule {
 const consoleModule: StdlibModule = {
   functions: {
     say: { arity: 1, impl: (_i, args) => { console.log(args[0]); return null; } },
-    ask: { arity: 1, impl: async (_i, args) => { 
+    ask: { arity: 1, impl: async (_i, args) => {
       const readline = await import('readline/promises');
       const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
       const answer = await rl.question(String(args[0]));
@@ -23,21 +23,21 @@ const consoleModule: StdlibModule = {
       return answer;
     }},
     clear: { arity: 0, impl: () => { console.clear(); return null; } },
-    // Colors handled by interpreter
+
   },
 };
 
 const filesModule: StdlibModule = {
   functions: {
     create: { arity: 1, impl: (_i, args) => { fs.writeFileSync(String(args[0]), ''); return true; } },
-    delete: { arity: 1, impl: (_i, args) => { 
+    delete: { arity: 1, impl: (_i, args) => {
       const p = String(args[0]);
       if (fs.existsSync(p)) { fs.unlinkSync(p); return true; }
       return false;
     }},
     write: { arity: 2, impl: (_i, args) => { fs.writeFileSync(String(args[0]), String(args[1])); return true; } },
     append: { arity: 2, impl: (_i, args) => { fs.appendFileSync(String(args[0]), String(args[1])); return true; } },
-    read: { arity: 1, impl: (_i, args) => { 
+    read: { arity: 1, impl: (_i, args) => {
       const p = String(args[0]);
       if (!fs.existsSync(p)) throw new Error(`File not found: ${p}`);
       return fs.readFileSync(p, 'utf8');
@@ -57,12 +57,12 @@ const filesModule: StdlibModule = {
 const foldersModule: StdlibModule = {
   functions: {
     create: { arity: 1, impl: (_i, args) => { fs.mkdirSync(String(args[0]), { recursive: true }); return true; } },
-    delete: { arity: 1, impl: (_i, args) => { 
+    delete: { arity: 1, impl: (_i, args) => {
       const p = String(args[0]);
       if (fs.existsSync(p)) { fs.rmSync(p, { recursive: true }); return true; }
       return false;
     }},
-    list: { arity: 1, impl: (_i, args) => { 
+    list: { arity: 1, impl: (_i, args) => {
       const p = String(args[0]);
       if (!fs.existsSync(p)) return [];
       return fs.readdirSync(p);

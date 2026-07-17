@@ -16,7 +16,7 @@ program.statements.forEach((s, i) => console.log(i, s.type));
 
 const interpreter = new Interpreter();
 
-// Patch callUserFunction
+
 const originalCallUserFunction = interpreter.callUserFunction.bind(interpreter);
 interpreter.callUserFunction = async function(name, args) {
   console.log('>>> callUserFunction:', name, 'args:', args);
@@ -25,7 +25,7 @@ interpreter.callUserFunction = async function(name, args) {
   return result;
 };
 
-// Patch executeSay
+
 const originalExecuteSay = interpreter.executeSay.bind(interpreter);
 interpreter.executeSay = async function(stmt) {
   console.log('>>> executeSay start');
@@ -34,7 +34,7 @@ interpreter.executeSay = async function(stmt) {
   return result;
 };
 
-// Patch evaluate
+
 const originalEvaluate = interpreter.evaluate.bind(interpreter);
 interpreter.evaluate = async function(expr) {
   console.log('>>> evaluate:', expr.type);

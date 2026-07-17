@@ -14,7 +14,7 @@ const program = parser.parse();
 
 const interpreter = new Interpreter();
 
-// Patch callUserFunction with detailed logging
+
 const originalCallUserFunction = interpreter.callUserFunction.bind(interpreter);
 interpreter.callUserFunction = async function(name, args) {
   console.log('>>> callUserFunction start', name);
@@ -28,7 +28,7 @@ interpreter.callUserFunction = async function(name, args) {
   }
 };
 
-// Patch executeBlock
+
 const originalExecuteBlock = interpreter.executeBlock.bind(interpreter);
 interpreter.executeBlock = async function(statements) {
   console.log('>>> executeBlock start, statements:', statements.length);
@@ -41,7 +41,7 @@ interpreter.executeBlock = async function(statements) {
   }
 };
 
-// Patch execute
+
 const originalExecute = interpreter.execute.bind(interpreter);
 interpreter.execute = async function(stmt) {
   console.log('>>> execute:', stmt.type);

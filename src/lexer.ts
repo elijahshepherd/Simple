@@ -1,11 +1,8 @@
 export enum TokenType {
-  // Literals
   STRING = 'STRING',
   NUMBER = 'NUMBER',
   BOOLEAN = 'BOOLEAN',
   IDENTIFIER = 'IDENTIFIER',
-
-  // Keywords - Core
   SAY = 'SAY',
   ASK = 'ASK',
   REMEMBER = 'REMEMBER',
@@ -26,8 +23,6 @@ export enum TokenType {
   SECONDS = 'SECONDS',
   CLEAR = 'CLEAR',
   EXIT = 'EXIT',
-
-  // Keywords - Files
   CREATE = 'CREATE',
   DELETE = 'DELETE',
   WRITE = 'WRITE',
@@ -43,8 +38,6 @@ export enum TokenType {
   RENAME = 'RENAME',
   EXISTS = 'EXISTS',
   PATH = 'PATH',
-
-  // Keywords - System
   ARGS = 'ARGS',
   ENV = 'ENV',
   GET = 'GET',
@@ -52,15 +45,11 @@ export enum TokenType {
   RUN = 'RUN',
   PLATFORM = 'PLATFORM',
   ARCH = 'ARCH',
-
-  // Keywords - Random
   INT = 'INT',
   FLOAT = 'FLOAT',
   CHOICE = 'CHOICE',
   SHUFFLE = 'SHUFFLE',
   BOOL = 'BOOL',
-
-  // Keywords - Time
   NOW = 'NOW',
   SLEEP = 'SLEEP',
   FORMAT = 'FORMAT',
@@ -72,8 +61,6 @@ export enum TokenType {
   MINUTE = 'MINUTE',
   SECOND = 'SECOND',
   TIMESTAMP = 'TIMESTAMP',
-
-  // Keywords - Text
   TEXT = 'TEXT',
   UPPER = 'UPPER',
   LOWER = 'LOWER',
@@ -87,8 +74,6 @@ export enum TokenType {
   ENDS_WITH = 'ENDS_WITH',
   SUBSTRING = 'SUBSTRING',
   BY = 'BY',
-
-  // Keywords - Math
   MATH = 'MATH',
   ABS = 'ABS',
   ROUND = 'ROUND',
@@ -102,8 +87,6 @@ export enum TokenType {
   RANDOM = 'RANDOM',
   PI = 'PI',
   E = 'E',
-
-  // Keywords - Colors/Format
   RED = 'RED',
   GREEN = 'GREEN',
   BLUE = 'BLUE',
@@ -125,36 +108,26 @@ export enum TokenType {
   BG_MAGENTA = 'BG_MAGENTA',
   BG_WHITE = 'BG_WHITE',
   BG_BLACK = 'BG_BLACK',
-
-  // Operators - Comparison
   IS = 'IS',
   IS_NOT = 'IS_NOT',
   GREATER_THAN = 'GREATER_THAN',
   LESS_THAN = 'LESS_THAN',
   GREATER_EQUAL = 'GREATER_EQUAL',
   LESS_EQUAL = 'LESS_EQUAL',
-
-  // Operators - Math
   PLUS = 'PLUS',
   MINUS = 'MINUS',
   MULTIPLY = 'MULTIPLY',
   DIVIDED_BY = 'DIVIDED_BY',
   MOD = 'MOD',
-
-  // Operators - Logic
   AND = 'AND',
   OR = 'OR',
   NOT = 'NOT',
-
-  // Additional keywords
   TO = 'TO',
   FROM = 'FROM',
   DIR = 'DIR',
   NAME = 'NAME',
   EXT = 'EXT',
   NUM = 'NUM',
-
-  // Punctuation
   LPAREN = 'LPAREN',
   RPAREN = 'RPAREN',
   LBRACKET = 'LBRACKET',
@@ -165,8 +138,6 @@ export enum TokenType {
   COLON = 'COLON',
   DOT = 'DOT',
   ARROW = 'ARROW',
-
-  // Special
   NEWLINE = 'NEWLINE',
   EOF = 'EOF',
   COMMENT = 'COMMENT',
@@ -356,9 +327,6 @@ export function lex(source: string): Token[] {
   };
 
   while (i < source.length) {
-    const ch = peek();
-
-    // Skip whitespace (but track newlines)
     if (ch === ' ' || ch === '\t' || ch === '\r') {
       advance();
       continue;
@@ -380,7 +348,6 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // String literals
     if (ch === '"' || ch === "'") {
       const quote = advance();
       let value = '';
@@ -402,7 +369,6 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // Numbers
     if (/[0-9]/.test(ch)) {
       let value = '';
       let isFloat = false;
@@ -417,7 +383,6 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // Identifiers and keywords (including multi-word)
     if (/[a-zA-Z_]/.test(ch)) {
       let value = '';
       let startCol = column;
@@ -425,7 +390,6 @@ export function lex(source: string): Token[] {
         value += advance();
       }
 
-      // Check for multi-word keywords (greedy - longest match first)
       const checkMultiWord = (base: string) => {
         const savedI = i;
         const savedLine = line;
@@ -482,7 +446,6 @@ export function lex(source: string): Token[] {
           return bestMatch;
         }
         
-        // Restore
         i = savedI;
         line = savedLine;
         column = savedCol;
@@ -507,7 +470,6 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // Operators and punctuation
     const twoChar = ch + peek(1);
     if (twoChar === '->') {
       advance(); advance();
@@ -533,7 +495,6 @@ export function lex(source: string): Token[] {
       continue;
     }
 
-    // Unknown character
     advance();
   }
 

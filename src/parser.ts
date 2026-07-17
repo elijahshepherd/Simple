@@ -1,7 +1,7 @@
 import { Token, TokenType, lex } from './lexer.js';
 import { SimpleError, unexpectedToken } from './errors.js';
 
-// AST Node Types
+
 export type Expr =
   | { type: 'Literal'; value: string | number | boolean }
   | { type: 'Identifier'; name: string }
@@ -27,7 +27,7 @@ export type Stmt =
   | { type: 'Wait'; duration: Expr }
   | { type: 'Clear' }
   | { type: 'Exit'; code?: Expr }
-  // File operations
+
   | { type: 'CreateFile'; path: Expr }
   | { type: 'DeleteFile'; path: Expr }
   | { type: 'WriteFile'; path: Expr; content: Expr; append: boolean }
@@ -41,27 +41,27 @@ export type Stmt =
   | { type: 'PathName'; path: Expr; target: string }
   | { type: 'PathExt'; path: Expr; target: string }
   | { type: 'Cwd'; target: string }
-  // Folder operations
+
   | { type: 'CreateFolder'; path: Expr }
   | { type: 'DeleteFolder'; path: Expr }
   | { type: 'ListFolder'; path: Expr; target: string }
   | { type: 'FolderExists'; path: Expr; target: string }
   | { type: 'HomeDir'; target: string }
   | { type: 'TempDir'; target: string }
-  // System
+
   | { type: 'Args'; target: string }
   | { type: 'EnvGet'; key: Expr; target: string }
   | { type: 'EnvSet'; key: Expr; value: Expr }
   | { type: 'RunCommand'; command: Expr; target?: string }
   | { type: 'Platform'; target: string }
   | { type: 'Arch'; target: string }
-  // Random
+
   | { type: 'RandomInt'; min: Expr; max: Expr; target: string }
   | { type: 'RandomFloat'; min: Expr; max: Expr; target: string }
   | { type: 'RandomChoice'; list: Expr; target: string }
   | { type: 'RandomShuffle'; list: Expr; target: string }
   | { type: 'RandomBool'; target: string }
-  // Time
+
   | { type: 'TimeNow'; target: string }
   | { type: 'TimeSleep'; duration: Expr }
   | { type: 'TimeFormat'; timestamp: Expr; format: Expr; target: string }
@@ -73,7 +73,7 @@ export type Stmt =
   | { type: 'TimeMinute'; timestamp: Expr; target: string }
   | { type: 'TimeSecond'; timestamp: Expr; target: string }
   | { type: 'TimeTimestamp'; target: string }
-  // Text
+
   | { type: 'TextUpper'; text: Expr; target: string }
   | { type: 'TextLower'; text: Expr; target: string }
   | { type: 'TextTrim'; text: Expr; target: string }
@@ -85,7 +85,7 @@ export type Stmt =
   | { type: 'TextStartsWith'; text: Expr; prefix: Expr; target: string }
   | { type: 'TextEndsWith'; text: Expr; suffix: Expr; target: string }
   | { type: 'TextSubstring'; text: Expr; start: Expr; end?: Expr; target: string }
-  // Math
+
   | { type: 'MathAbs'; value: Expr; target: string }
   | { type: 'MathRound'; value: Expr; target: string }
   | { type: 'MathFloor'; value: Expr; target: string }
@@ -98,7 +98,7 @@ export type Stmt =
   | { type: 'MathRandom'; target: string }
   | { type: 'MathPi'; target: string }
   | { type: 'MathE'; target: string }
-  // List operations
+
   | { type: 'ListPush'; list: Expr; value: Expr }
   | { type: 'ListPop'; list: Expr; target: string }
   | { type: 'ListLength'; list: Expr; target: string }
@@ -140,44 +140,44 @@ export class Parser {
   }
 
   private statement(): Stmt {
-    // Import
+
     if (this.match(TokenType.IMPORT)) return this.importStatement();
 
-    // Say
+
     if (this.match(TokenType.SAY)) return this.sayStatement();
 
-    // Ask
+
     if (this.match(TokenType.ASK)) return this.askStatement();
 
-    // Remember / Constant
+
     if (this.match(TokenType.REMEMBER)) return this.rememberStatement(false);
     if (this.match(TokenType.CONSTANT)) return this.rememberStatement(true);
 
-    // If
+
     if (this.match(TokenType.IF)) return this.ifStatement();
 
-    // Repeat
+
     if (this.match(TokenType.REPEAT)) return this.repeatStatement();
 
-    // Function
+
     if (this.match(TokenType.FUNCTION)) return this.functionStatement();
 
-    // Return
+
     if (this.match(TokenType.RETURN)) return this.returnStatement();
 
-    // Call
+
     if (this.match(TokenType.CALL)) return this.callStatement();
 
-    // Wait
+
     if (this.match(TokenType.WAIT)) return this.waitStatement();
 
-    // Clear
+
     if (this.match(TokenType.CLEAR)) return { type: 'Clear' };
 
-    // Exit
+
     if (this.match(TokenType.EXIT)) return this.exitStatement();
 
-    // File operations
+
     if (this.match(TokenType.CREATE)) {
       if (this.match(TokenType.FILE)) return this.createFileStatement();
       if (this.match(TokenType.FOLDER) || this.match(TokenType.MAKE)) return this.createFolderStatement();
@@ -205,42 +205,42 @@ export class Parser {
     if (this.match(TokenType.LIST) && this.match(TokenType.FOLDER)) return this.listFolderStatement();
     if (this.match(TokenType.EXISTS) && this.match(TokenType.FOLDER)) return this.folderExistsStatement();
 
-    // System
+
     if (this.match(TokenType.ARGS)) return this.argsStatement();
     if (this.match(TokenType.ENV)) return this.envStatement();
     if (this.match(TokenType.RUN)) return this.runCommandStatement();
     if (this.match(TokenType.PLATFORM)) return this.platformStatement();
     if (this.match(TokenType.ARCH)) return this.archStatement();
 
-    // Random
+
     if (this.match(TokenType.RANDOM)) return this.randomStatement();
 
-    // Time
+
     if (this.match(TokenType.NOW)) return this.timeStatement();
     if (this.match(TokenType.SLEEP)) return this.sleepStatement();
     if (this.match(TokenType.FORMAT)) return this.formatStatement();
 
-    // Text
+
     if (this.match(TokenType.TEXT)) return this.textStatement();
 
-    // Math
+
     if (this.match(TokenType.MATH)) return this.mathStatement();
 
-    // List operations
+
     if (this.check(TokenType.IDENTIFIER)) {
       const next = this.peek(1);
       if (next?.type === TokenType.DOT) {
         return this.methodCallStatement();
       }
-      // Handle "list.method args" syntax without dot (e.g., "numbers.push 6")
-      // The method name can be IDENTIFIER or a keyword like LENGTH, CONTAINS
+
+
       if (next && (next.type === TokenType.IDENTIFIER ||
           next.type === TokenType.LENGTH || next.type === TokenType.CONTAINS)) {
         return this.spaceDelimMethodCall();
       }
     }
 
-    // Expression statement (fallback)
+
     const expr = this.expression();
     this.consumeNewline();
     return { type: 'Expression', expr } as any;
@@ -260,7 +260,7 @@ export class Parser {
   private sayStatement(): Stmt {
     const styles: string[] = [];
 
-    // Parse color/style modifiers before the expression
+
     while (true) {
       if (this.match(TokenType.RED)) styles.push('red');
       else if (this.match(TokenType.GREEN)) styles.push('green');
@@ -286,11 +286,11 @@ export class Parser {
       else break;
     }
 
-    // Parse first expression
+
     let expr = this.expression();
 
-    // Parse additional expressions for implicit concatenation
-    // Check if next token could start an expression (for implicit concatenation)
+
+
     while (this.isExpressionStart()) {
       const right = this.expression();
       expr = { type: 'Binary', left: expr, operator: TokenType.PLUS, right };
@@ -300,7 +300,7 @@ export class Parser {
     return { type: 'Say', expr, styles };
   }
 
-  // Check if current token can start an expression (for implicit concatenation in say)
+
   private isExpressionStart(): boolean {
     const token = this.peek();
     return (
@@ -317,7 +317,7 @@ export class Parser {
     );
   }
 
-  // Check if a property name is a module method that can be called with space-separated args
+
   private isModuleCallStart(method: string): boolean {
     const moduleMethods = new Set(['int', 'float', 'choice', 'shuffle', 'bool',
       'upper', 'lower', 'trim', 'split', 'join', 'replace', 'contains',
@@ -328,8 +328,8 @@ export class Parser {
     return moduleMethods.has(method.toLowerCase());
   }
 
-// Parse arguments for a module-style call like "random.int 1 to 100"
-// Arguments are separated by "to", "from", "with", "as", "by", "into" or end of line
+
+
   private parseModuleCallArgs(): Expr[] {
     const args: Expr[] = [];
     const separators = new Set([
@@ -340,12 +340,12 @@ export class Parser {
 
     while (!this.isAtEnd() && !separators.has(this.peek().type) && this.isExpressionStart()) {
       args.push(this.expression());
-      // After an expression, check if we have a separator like "to" that should be consumed
+
       if (this.isAtEnd()) break;
       if (separators.has(this.peek().type)) {
-        // Consume the separator (e.g., "to" in "random.int 1 to 100")
+
         this.advance();
-        // Check if we should continue parsing more arguments
+
         if (this.isAtEnd() || !this.isExpressionStart()) break;
       } else {
         break;
@@ -398,7 +398,7 @@ export class Parser {
   }
 
   private repeatStatement(): Stmt {
-    // Check for "repeat N times" or "repeat while condition"
+
     if (this.check(TokenType.NUMBER) || this.check(TokenType.IDENTIFIER) || this.check(TokenType.LPAREN)) {
       const count = this.expression();
       this.consume(TokenType.TIMES, ['"times"']);
@@ -436,10 +436,10 @@ export class Parser {
   private functionStatement(): Stmt {
     const nameToken = this.consumeName(['function name']);
     const params: string[] = [];
-    
-    // Support both "function name(params)" and "function name with params"
+
+
     if (this.match(TokenType.LPAREN)) {
-      // Syntax: function name(param1, param2)
+
       if (!this.check(TokenType.RPAREN)) {
         do {
           const param = this.consumeName(['parameter name']);
@@ -448,7 +448,7 @@ export class Parser {
       }
       this.consume(TokenType.RPAREN, ['")"']);
     } else if (this.match(TokenType.WITH)) {
-      // Syntax: function name with param1, param2
+
       do {
         const param = this.consumeName(['parameter name']);
         params.push(param.value);
@@ -471,7 +471,7 @@ export class Parser {
     let value: Expr | undefined;
     if (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF) && !this.check(TokenType.END)) {
       value = this.expression();
-      // Parse additional expressions for implicit concatenation (like in say)
+
       while (this.isExpressionStart()) {
         const right = this.expression();
         value = { type: 'Binary', left: value!, operator: TokenType.PLUS, right };
@@ -495,7 +495,7 @@ export class Parser {
 
   private waitStatement(): Stmt {
     const duration = this.expression();
-    this.match(TokenType.SECONDS); // optional "seconds"
+    this.match(TokenType.SECONDS);
     this.consumeNewline();
     return { type: 'Wait', duration };
   }
@@ -551,7 +551,7 @@ export class Parser {
 
   private copyFileStatement(): Stmt {
     const from = this.expression();
-    this.consume(TokenType.TO, ['"to"']); // We'll need to add TO token
+    this.consume(TokenType.TO, ['"to"']);
     const to = this.expression();
     this.consumeNewline();
     return { type: 'CopyFile', from, to };
@@ -683,14 +683,14 @@ export class Parser {
   }
 
   private randomStatement(): Stmt {
-    // Handle optional dot after random (random.int, random.float, etc.)
+
     this.match(TokenType.DOT);
-    
+
     if (this.match(TokenType.INT)) {
       const min = this.expression();
       this.consume(TokenType.TO, ['"to"']);
       const max = this.expression();
-      // Random can be used as expression (no into) or statement (with into)
+
       if (this.match(TokenType.INTO)) {
         const target = this.consumeName(['variable name']);
         this.consumeNewline();
@@ -908,7 +908,7 @@ export class Parser {
     this.consume(TokenType.DOT, ['"."']);
     const methodToken = this.consume(TokenType.IDENTIFIER, ['method name']);
     const method = methodToken.value;
-    // List methods
+
     const listMethods: Record<string, { type: Stmt['type']; params: string[] }> = {
       'push': { type: 'ListPush', params: ['list', 'value'] },
       'pop': { type: 'ListPop', params: ['list'] },
@@ -924,7 +924,7 @@ export class Parser {
     if (listMethods[method]) {
       const info = listMethods[method];
       const args: Expr[] = [];
-      // Optional parentheses - support both "obj.method(args)" and "obj.method args"
+
       let hasParens = false;
       if (this.match(TokenType.LPAREN)) {
         hasParens = true;
@@ -935,7 +935,7 @@ export class Parser {
         }
         this.consume(TokenType.RPAREN, ['")"']);
       } else if (info.params.length > 1 || (info.params.length === 1 && info.params[0] !== 'list')) {
-        // Parse space-separated argument (e.g., "list.push 6")
+
         while (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF) &&
                !this.check(TokenType.INTO) && !this.check(TokenType.END)) {
           args.push(this.expression());
@@ -950,15 +950,15 @@ export class Parser {
       }
       this.consumeNewline();
 
-      // Build identifier expression for the list
+
       const listExpr: Expr = { type: 'Identifier', name: objToken.value };
 
       const stmt: any = { type: info.type };
-      // Filter out the 'list' param to get the arg-only params
+
       const argParams = info.params.filter(p => p !== 'list');
-      // stmt.list = listExpr (the list)
+
       stmt.list = listExpr;
-      // The remaining args map to argParams in order
+
       argParams.forEach((param, i) => {
         stmt[param] = args[i] || listExpr;
       });
@@ -966,16 +966,16 @@ export class Parser {
       return stmt;
     }
 
-    // Dict methods would go here
+
     throw new SimpleError(`Unknown method "${method}".`, methodToken.line, methodToken.column);
   }
 
-  // Handle "list.method args" syntax without dot (e.g., "numbers.push 6", "nums.contains 4")
+
   private spaceDelimMethodCall(): Stmt {
     const objToken = this.consume(TokenType.IDENTIFIER, ['list name']);
     const listName = objToken.value;
 
-    // Get the method name (could be IDENTIFIER or keyword)
+
     let methodName: string;
     if (this.check(TokenType.IDENTIFIER)) {
       methodName = this.advance().value;
@@ -1004,12 +1004,12 @@ export class Parser {
       throw unexpectedToken(this.peek(), Object.keys(listMethods));
     }
 
-    // Parse arguments (exclude "into" which is for the target)
+
     const args: Expr[] = [];
     while (!this.check(TokenType.NEWLINE) && !this.check(TokenType.EOF) &&
            !this.check(TokenType.INTO) && !this.check(TokenType.END)) {
       args.push(this.expression());
-      break; // Only one arg for now
+      break;
     }
 
     let target: string | undefined;
@@ -1018,7 +1018,7 @@ export class Parser {
     }
     this.consumeNewline();
 
-    // Build identifier expression for the list
+
     const listExpr: Expr = { type: 'Identifier', name: listName };
 
     const stmt: any = { type: info.type };
@@ -1033,7 +1033,7 @@ export class Parser {
     return stmt;
   }
 
-  // Expression parsing with precedence climbing
+
   private expression(): Expr {
     return this.assignment();
   }
@@ -1066,11 +1066,11 @@ export class Parser {
   private equality(): Expr {
     let expr = this.comparison();
     while (this.match(TokenType.IS, TokenType.IS_NOT)) {
-      // Check if this is a comparison phrase like "is greater than", "is less than"
+
       if (this.check(TokenType.GREATER_THAN) || this.check(TokenType.LESS_THAN) ||
           this.check(TokenType.GREATER_EQUAL) || this.check(TokenType.LESS_EQUAL)) {
-        const operator = this.advance().type; // consume GREATER_THAN, LESS_THAN, etc.
-        // Optional "to" after comparison operators
+        const operator = this.advance().type;
+
         this.match(TokenType.TO);
         const right = this.comparison();
         expr = { type: 'Binary', left: expr, operator, right };
@@ -1129,9 +1129,9 @@ export class Parser {
     while (true) {
       if (this.match(TokenType.LPAREN)) {
         if (!canCall) {
-          // This is a grouping parenthesis, not a function call
-          // Put the token back and return the expression
-          this.current--; // backtrack
+
+
+          this.current--;
           return expr;
         }
         const args: Expr[] = [];
@@ -1142,14 +1142,14 @@ export class Parser {
         }
         this.consume(TokenType.RPAREN, ['")"']);
         expr = { type: 'Call', callee: expr, args };
-        canCall = true; // chained calls are allowed
+        canCall = true;
       } else if (this.match(TokenType.LBRACKET)) {
         const index = this.expression();
         this.consume(TokenType.RBRACKET, ['"]"']);
         expr = { type: 'Index', object: expr, index };
         canCall = false;
       } else if (this.match(TokenType.DOT)) {
-        // Accept identifier or keyword as property name (for things like .length, .push, .int, etc.)
+
         let propertyName: string;
         if (this.check(TokenType.IDENTIFIER)) {
           propertyName = this.consume(TokenType.IDENTIFIER, ['property name']).value;
@@ -1213,9 +1213,9 @@ export class Parser {
           throw unexpectedToken(this.peek(), ['property name']);
         }
         expr = { type: 'Property', object: expr, property: propertyName };
-        canCall = true; // allow it to be called as a method (e.g., random.int)
-        // Check for space-separated arguments (e.g., "random.int 1 to 100")
-        // After a property access like random.int, parse arguments until newline or end
+        canCall = true;
+
+
         if (this.isModuleCallStart(propertyName)) {
           const args = this.parseModuleCallArgs();
           if (args.length > 0) {
@@ -1232,7 +1232,7 @@ export class Parser {
   }
 
   private primary(): Expr {
-    // Call function expression: call name with args
+
     if (this.match(TokenType.CALL)) {
       const nameToken = this.consumeName(['function name']);
       const args: Expr[] = [];
@@ -1244,7 +1244,7 @@ export class Parser {
       return { type: 'Call', callee: { type: 'Identifier', name: nameToken.value }, args };
     }
 
-    // Literals
+
     if (this.match(TokenType.STRING)) {
       return { type: 'Literal', value: this.previous().value };
     }
@@ -1255,24 +1255,24 @@ export class Parser {
       return { type: 'Literal', value: this.previous().value === 'true' };
     }
 
-    // List literal
+
     if (this.match(TokenType.LBRACKET)) {
       const elements: Expr[] = [];
-      // Consume newlines after the opening bracket
+
       this.match(TokenType.NEWLINE);
       if (!this.check(TokenType.RBRACKET)) {
         do {
           this.consumeNewline();
           if (this.check(TokenType.RBRACKET)) break;
           elements.push(this.expression());
-          this.match(TokenType.NEWLINE); // Consume newline after element
+          this.match(TokenType.NEWLINE);
         } while (this.match(TokenType.COMMA));
       }
       this.consume(TokenType.RBRACKET, ['"]"']);
       return { type: 'List', elements };
     }
 
-    // Dict literal
+
     if (this.match(TokenType.LBRACE)) {
       const entries: { key: string; value: Expr }[] = [];
       this.match(TokenType.NEWLINE);
@@ -1291,19 +1291,19 @@ export class Parser {
       return { type: 'Dict', entries };
     }
 
-    // Grouping
+
     if (this.match(TokenType.LPAREN)) {
       const expr = this.expression();
       this.consume(TokenType.RPAREN, ['")"']);
       return expr;
     }
 
-    // Identifier
+
     if (this.match(TokenType.IDENTIFIER)) {
       return { type: 'Identifier', name: this.previous().value };
     }
 
-    // Accept any keyword as an identifier (for variables/functions named like keywords)
+
     const token = this.peek();
     if (token.type !== TokenType.EOF && token.type !== TokenType.NEWLINE &&
         token.type !== TokenType.COMMENT && token.value &&
@@ -1317,7 +1317,7 @@ export class Parser {
     throw unexpectedToken(this.peek(), ['expression']);
   }
 
-  // Utility methods
+
   private match(...types: TokenType[]): boolean {
     for (const type of types) {
       if (this.check(type)) {
@@ -1355,10 +1355,10 @@ export class Parser {
     throw unexpectedToken(this.peek(), expected);
   }
 
-  // Accept identifier or keyword as a name (for variable/function names that collide with keywords)
+
   private consumeName(expected: string[]): Token {
     if (this.check(TokenType.IDENTIFIER)) return this.advance();
-    // Accept any keyword token as a name
+
     const token = this.peek();
     if (token.type !== TokenType.EOF && token.type !== TokenType.NEWLINE &&
         token.type !== TokenType.COMMENT && token.value) {

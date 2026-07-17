@@ -7,7 +7,7 @@ const parser = new Parser(source);
 const program = parser.parse();
 console.log('Statements:', program.statements.length);
 
-// Patch the interpreter to debug
+
 const originalExecute = Interpreter.prototype.execute;
 Interpreter.prototype.execute = async function(stmt) {
   console.log('Executing:', stmt.type, JSON.stringify(stmt).substring(0, 100));

@@ -49,7 +49,7 @@ for (const file of files) {
   allVersions.push({ version, date, sections });
 }
 
-// Generate HTML
+
 let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,7 +92,7 @@ let html = `<!DOCTYPE html>
       margin: 0 auto;
       padding: 40px 20px;
     }
-    
+
     /* Warning banner */
     .warning {
       background: var(--accent);
@@ -120,12 +120,12 @@ let html = `<!DOCTYPE html>
       cursor: pointer;
     }
     .warning .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,0.3); }
-    
+
     header { text-align: center; margin-bottom: 40px; }
     .logo { font-size: 2.5rem; margin-bottom: 8px; }
     h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
     .subtitle { color: var(--fg-muted); font-size: 1.1rem; font-weight: 400; }
-    
+
     /* Platform install methods */
     .platforms {
       display: grid;
@@ -141,8 +141,8 @@ let html = `<!DOCTYPE html>
       transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
       cursor: pointer;
     }
-    .platform-card:hover { 
-      border-color: var(--fg-muted); 
+    .platform-card:hover {
+      border-color: var(--fg-muted);
       box-shadow: 0 8px 32px var(--shadow);
       transform: translateY(-2px);
     }
@@ -165,7 +165,7 @@ let html = `<!DOCTYPE html>
     .platform-icon svg { width: 28px; height: 28px; fill: var(--bg); }
     .platform-name { font-size: 1.25rem; font-weight: 700; }
     .platform-desc { color: var(--fg-muted); font-size: 0.9rem; margin-bottom: 20px; }
-    
+
     .install-section {
       border-top: 1px solid var(--border);
       padding-top: 16px;
@@ -200,9 +200,9 @@ let html = `<!DOCTYPE html>
     }
     .code-block:hover .copy-btn { opacity: 1; }
     .copy-btn.copied { background: #10b981; opacity: 1; }
-    
+
     .uninstall-label { font-size: 0.75rem; text-transform: ; letter-spacing: 0.08em; color: var(--fg-subtle); margin: 16px 0 8px; }
-    
+
     footer {
       margin-top: 48px;
       padding-top: 24px;
@@ -213,7 +213,7 @@ let html = `<!DOCTYPE html>
     }
     footer a { color: var(--fg-muted); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
-    
+
     .download-btn {
       display: inline-block;
       background: var(--accent);
@@ -228,9 +228,9 @@ let html = `<!DOCTYPE html>
       cursor: pointer;
     }
     .warning .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,0.3); }
-    
+
     .download-section { text-align: center; margin: 24px 0 40px; }
-    
+
     @media (max-width: 600px) {
       .container { padding: 24px 16px; }
       h1 { font-size: 1.8rem; }
@@ -247,13 +247,13 @@ let html = `<!DOCTYPE html>
       <p>Download <code>simple.exe</code>, run it, click <strong>Install</strong>, then open a <strong>new terminal</strong> to use <code>simple</code> commands.
       <a href="simple.exe" class="btn" download>Download simple.exe</a>
     </div>
-    
+
     <header>
       <div class="logo">Simple</div>
       <h1>Installation</h1>
       <p class="subtitle">Install Simple on your platform</p>
     </header>
-    
+
     <!-- Platform install methods -->
     <div class="platforms">
       <!-- Windows -->
@@ -275,7 +275,7 @@ let html = `<!DOCTYPE html>
           </div>
         </div>
       </article>
-      
+
       <!-- Linux -->
       <article class="platform-card">
         <div class="platform-header">
@@ -322,7 +322,7 @@ let html = `<!DOCTYPE html>
       <h1>Simple</h1>
       <p class="subtitle">Version <span id="version-display">1.5.0</span></p>
     </header>
-    
+
     <div class="version-grid">
       <article class="version-card">
         <div class="version-header">
@@ -344,11 +344,11 @@ let html = `<!DOCTYPE html>
       <p>Simple Programming Language · <a href="https://github.com/elijahshepherd/Simple" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/elijahshepherd/Simple/issues" target="_blank" rel="noopener">Issues</a></p>
     </footer>
   </div>
-  
+
   <script>
     // Version display
     document.getElementById('version-display').textContent = '1.5.0';
-    
+
     function copy(btn, text) {
       navigator.clipboard.writeText(text).then(() => {
         btn.textContent = 'Copied';

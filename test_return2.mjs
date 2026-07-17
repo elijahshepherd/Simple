@@ -13,14 +13,14 @@ const parser = new Parser(source);
 const program = parser.parse();
 console.log('Statements:', program.statements.length);
 
-// Patch executeReturn to debug
+
 const originalExecuteReturn = Interpreter.prototype.executeReturn;
 Interpreter.prototype.executeReturn = async function(stmt) {
   console.log('>>> executeReturn called');
   return originalExecuteReturn.call(this, stmt);
 };
 
-// Patch callUserFunction to debug
+
 const originalCallUserFunction = Interpreter.prototype.callUserFunction;
 Interpreter.prototype.callUserFunction = async function(name, args) {
   console.log('>>> callUserFunction called for', name);

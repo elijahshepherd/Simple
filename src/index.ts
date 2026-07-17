@@ -6,28 +6,28 @@ const { join, dirname, basename } = require('path');
 const { execSync } = require('child_process');
 const readline = require('readline/promises');
 
-// Find examples directory - works for both source and pkg'd executable
+
 function getExamplesDir(): string {
-  // First try: relative to __dirname (source/build)
+
   let dir = join(__dirname, '..', 'examples');
   if (existsSync(dir)) return dir;
-  
-  // Second try: relative to process.execPath (pkg executable location)
+
+
   dir = join(dirname(process.execPath), '..', 'examples');
   if (existsSync(dir)) return dir;
-  
-  // Third try: pkg's temporary extraction path
+
+
   const pkgProcess = process as any;
   if (pkgProcess.pkg && pkgProcess.pkg.entrypoint) {
     dir = join(dirname(pkgProcess.pkg.entrypoint), '..', 'examples');
     if (existsSync(dir)) return dir;
   }
-  
-  // Fallback: current working directory
+
+
   dir = join(process.cwd(), 'examples');
   if (existsSync(dir)) return dir;
-  
-  // Last resort: return the original path (will fail gracefully)
+
+
   return join(__dirname, '..', 'examples');
 }
 
@@ -37,7 +37,7 @@ const BIN_DIR = join(INSTALL_DIR, 'bin');
 const INSTALLED_EXE = join(BIN_DIR, 'simple.exe');
 const VERSION = '1.5.0';
 
-// Check if this is the installed version
+
 function isInstalledVersion(): boolean {
   try {
     const currentExe = process.execPath;
@@ -47,7 +47,7 @@ function isInstalledVersion(): boolean {
   }
 }
 
-// Check if simple is in PATH
+
 function isInPath(): boolean {
   try {
     const pathEnv = process.env.PATH || '';
@@ -58,7 +58,7 @@ function isInPath(): boolean {
   }
 }
 
-// Show welcome/install prompt
+
 async function showWelcomeAndInstall(): Promise<boolean> {
   console.log('');
   console.log('╔══════════════════════════════════════════════════════════════╗');
@@ -75,36 +75,36 @@ async function showWelcomeAndInstall(): Promise<boolean> {
   console.log('║     [N] No, just run this time                              ║');
   console.log('║                                                              ║');
   console.log('╚══════════════════════════════════════════════════════════════╝');
-  
+
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   const answer = await rl.question('Install Simple? [Y/n]: ');
   rl.close();
   return answer.trim().toLowerCase() !== 'n';
 }
 
-// Install Simple to user directory
+
 async function installSimple(): Promise<boolean> {
   try {
     console.log('\nInstalling Simple...');
-    
-    // Create directories
+
+
     mkdirSync(INSTALL_DIR, { recursive: true });
     mkdirSync(BIN_DIR, { recursive: true });
     mkdirSync(join(INSTALL_DIR, 'examples'), { recursive: true });
-    
-    // Copy this executable
+
+
     const currentExe = process.execPath;
     copyFileSync(currentExe, INSTALLED_EXE);
-    
-    // Copy examples
+
+
     if (existsSync(EXAMPLES_DIR)) {
       const files = readdirSync(EXAMPLES_DIR).filter((f: string) => f.endsWith('.spml'));
       for (const file of files) {
         copyFileSync(join(EXAMPLES_DIR, file), join(INSTALL_DIR, 'examples', file));
       }
     }
-    
-    // Create uninstaller
+
+
     const uninstaller = join(INSTALL_DIR, 'uninstall.bat');
     writeFileSync(uninstaller, `@echo off
 echo Uninstalling Simple Programming Language...
@@ -126,8 +126,8 @@ echo.
 echo Simple has been uninstalled.
 pause
 `, 'utf8');
-    
-    // Create Start Menu shortcuts (using PowerShell)
+
+
     const psScript = `
 $shell = New-Object -ComObject WScript.Shell
 $startMenu = Join-Path $env:APPDATA "Microsoft\\Windows\\Start Menu\\Programs\\Simple Programming Language"
@@ -152,23 +152,21 @@ $shortcut.Description = "Simple Programming Language Documentation"
 $shortcut.Save()
 `;
     execSync(`powershell -ExecutionPolicy Bypass -Command "${psScript.replace(/"/g, '\\"')}"`, { stdio: 'ignore' });
-    
-    // Add to user PATH using PowerShell (more reliable than setx)
+
     const currentPath = process.env.PATH || '';
     if (!currentPath.toLowerCase().includes(BIN_DIR.toLowerCase())) {
       const psPathCmd = `[Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH', 'User') + ';${BIN_DIR.replace(/\\/g, '\\\\')}', 'User')`;
       execSync(`powershell -ExecutionPolicy Bypass -Command "${psPathCmd}"`, { stdio: 'ignore' });
-      
-      // Also update current process PATH for immediate use
+
       process.env.PATH = currentPath + ';' + BIN_DIR;
     }
-    
+
     console.log('\n✓ Simple installed successfully!');
     console.log(`  Installed to: ${INSTALL_DIR}`);
     console.log(`  Added to PATH: ${BIN_DIR}`);
     console.log('\nYou can now run `simple` from any new terminal window.');
     console.log('Try: simple run-example hello\n');
-    
+
     return true;
   } catch (error: unknown) {
     const err = error as Error;
@@ -177,7 +175,6 @@ $shortcut.Save()
   }
 }
 
-// Run installed version with forwarded arguments
 function runInstalledVersion(args: string[]): void {
   try {
     const child = require('child_process').spawnSync(INSTALLED_EXE, args, {
@@ -216,8 +213,7 @@ async function buildFile(inputPath: string, outputPath?: string): Promise<void> 
   const parser = new Parser(source);
   const program = parser.parse();
   const outPath = outputPath || inputPath.replace('.spml', '.js');
-  const wrapper = `// Compiled from ${inputPath}
-const { Interpreter } = require('./dist/interpreter.js');
+  const wrapper = `const { Interpreter } = require('./dist/interpreter.js');
 const { Parser } = require('./dist/parser.js');
 
 const source = \`${source.replace(/`/g, '\\`')}\`;
@@ -314,17 +310,12 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args[0];
 
-  // First-run installation check
   if (!isInstalledVersion()) {
-    // Not running from installed location
-    
-    // No arguments = show welcome and prompt to install
     if (args.length === 0) {
       const shouldInstall = await showWelcomeAndInstall();
       if (shouldInstall) {
         const success = await installSimple();
         if (success) {
-          // Re-run with installed version (no args to show help)
           runInstalledVersion([]);
           return;
         } else {
@@ -333,14 +324,12 @@ async function main(): Promise<void> {
       } else {
         console.log('Continuing without installation...\n');
       }
-      // If not installed or user declined, show help and exit
       showHelp();
       console.log('\n---');
       console.log('Note: Simple is not installed. Run without arguments to install.');
       return;
     }
-    
-    // Explicit version/help flags
+
     if (command === '--version' || command === '-v') {
       console.log(VERSION);
       return;
@@ -351,13 +340,11 @@ async function main(): Promise<void> {
       console.log('Note: Simple is not installed. Run without arguments to install.');
       return;
     }
-    
-    // For other commands, prompt to install
+
     const shouldInstall = await showWelcomeAndInstall();
     if (shouldInstall) {
       const success = await installSimple();
       if (success) {
-        // Re-run with installed version
         runInstalledVersion(args);
         return;
       } else {
@@ -368,7 +355,6 @@ async function main(): Promise<void> {
     }
   }
 
-  // Running from installed location or user chose not to install
   switch (command) {
     case 'run': {
       const file = args[1];

@@ -3,7 +3,7 @@ import { TokenType } from './dist/lexer.js';
 
 const source = 'attempts is less than maxAttempts';
 
-// Add debug to the parser
+
 const originalMatch = Parser.prototype.match;
 Parser.prototype.match = function(...types) {
   console.log('match() called, types:', types.map(t => TokenType[t]), 'current:', this.peek().type);

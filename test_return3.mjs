@@ -2,8 +2,8 @@ import { Interpreter, ReturnValue } from './dist/interpreter.js';
 
 async function test() {
   const interpreter = new Interpreter();
-  
-  // Test 1: Direct throw and catch
+
+
   try {
     throw new ReturnValue(42);
   } catch (e) {
@@ -13,7 +13,7 @@ async function test() {
     console.log('  e.value:', e.value);
   }
 
-  // Test 2: Through async function
+
   async function testAsync() {
     try {
       throw new ReturnValue(99);
@@ -24,7 +24,7 @@ async function test() {
       throw e;
     }
   }
-  
+
   const result = await testAsync();
   console.log('Test 2 - Async function return:', result);
 }

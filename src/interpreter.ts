@@ -92,7 +92,7 @@ export class Interpreter {
   }
 
   private defineGlobals(): void {
-    // Register stdlib modules
+
     for (const [modName, mod] of Object.entries(this.stdlib)) {
       for (const [funcName, func] of Object.entries(mod.functions)) {
         const fullName = `${modName}.${funcName}`;
@@ -104,7 +104,7 @@ export class Interpreter {
       }
     }
 
-    // Built-in 'say' handled specially with styles
+
     this.globals.define('say', {
       name: 'say',
       arity: 1,
@@ -170,7 +170,7 @@ export class Interpreter {
       case 'Exit':
         await this.executeExit(stmt);
         break;
-      // File operations
+
       case 'CreateFile':
         await this.callStdlib('files', 'create', [await this.evaluate(stmt.path)]);
         break;
@@ -210,7 +210,7 @@ export class Interpreter {
       case 'Cwd':
         await this.executeCwd(stmt);
         break;
-      // Folder operations
+
       case 'CreateFolder':
         await this.callStdlib('folders', 'create', [await this.evaluate(stmt.path)]);
         break;
@@ -229,7 +229,7 @@ export class Interpreter {
       case 'TempDir':
         await this.callStdlib('folders', 'temp', []);
         break;
-      // System
+
       case 'Args':
         await this.executeArgs(stmt);
         break;
@@ -248,7 +248,7 @@ export class Interpreter {
       case 'Arch':
         await this.callStdlib('system', 'arch', []);
         break;
-      // Random
+
       case 'RandomInt':
         await this.executeRandomInt(stmt);
         break;
@@ -264,7 +264,7 @@ export class Interpreter {
       case 'RandomBool':
         await this.callStdlib('random', 'bool', []);
         break;
-      // Time
+
       case 'TimeNow':
         await this.executeTimeNow(stmt);
         break;
@@ -298,7 +298,7 @@ export class Interpreter {
       case 'TimeTimestamp':
         await this.callStdlib('time', 'timestamp', []);
         break;
-      // Text
+
       case 'TextUpper':
         await this.executeTextOp(stmt, 'upper');
         break;
@@ -332,7 +332,7 @@ export class Interpreter {
       case 'TextSubstring':
         await this.executeTextSubstring(stmt);
         break;
-      // Math
+
       case 'MathAbs':
         await this.executeMathOp(stmt, 'abs');
         break;
@@ -369,7 +369,7 @@ export class Interpreter {
       case 'MathE':
         await this.callStdlib('math', 'e', []);
         break;
-      // List ops
+
       case 'ListPush':
         await this.executeListPush(stmt);
         break;
@@ -398,7 +398,7 @@ export class Interpreter {
         await this.executeListReverse(stmt);
         break;
       default:
-        // Expression statement
+
         const s = stmt as any;
         if (s.type === 'Expression') {
           await this.evaluate(s.expr);
@@ -442,7 +442,7 @@ export class Interpreter {
       const distance = this.locals.get(expr)!;
       return this.environment.getAt(name, distance);
     }
-    // Check current environment and its parents
+
     return this.environment.get(name);
   }
 
@@ -506,8 +506,8 @@ export class Interpreter {
   }
 
   private async evaluateCall(expr: Expr & { type: 'Call' }): Promise<Value> {
-    // Special case: handle module-style calls like random.int(1, 100)
-    // where the callee is Property with Identifier object
+
+
     if (expr.callee.type === 'Property' && expr.callee.object.type === 'Identifier') {
       const moduleName = expr.callee.object.name.toLowerCase();
       const methodName = expr.callee.property.toLowerCase();
@@ -523,21 +523,21 @@ export class Interpreter {
           return callable.call(this, args);
         }
       } catch {
-        // Fall through to normal evaluation
+
       }
     }
 
-    // Special case: handle list method calls via Property (e.g., nums.contains 4)
-    // When callee is Property(nums, contains), treat it as a list method call
+
+
     if (expr.callee.type === 'Property' && expr.callee.object.type === 'Identifier') {
       const objName = expr.callee.object.name;
       const methodName = expr.callee.property.toLowerCase();
       const args = await Promise.all(expr.args.map(arg => this.evaluate(arg)));
-      // Look up the object (list or string)
+
       try {
         const obj = this.environment.get(objName);
 
-        // Handle array methods
+
         if (Array.isArray(obj)) {
           if (methodName === 'contains' && args.length === 1) {
             const targetVal = args[0];
@@ -571,7 +571,7 @@ export class Interpreter {
           }
         }
 
-        // Handle string methods
+
         if (typeof obj === 'string') {
           if (methodName === 'upper') return obj.toUpperCase();
           if (methodName === 'lower') return obj.toLowerCase();
@@ -584,7 +584,7 @@ export class Interpreter {
           if (methodName === 'replace' && args.length === 2) return obj.replaceAll(String(args[0]), String(args[1]));
         }
       } catch (e) {
-        // If variable not found, fall through to normal handler
+
       }
     }
 
@@ -635,17 +635,17 @@ export class Interpreter {
       return value;
     }
     if (Array.isArray(object)) {
-      // Handle array properties like .length
+
       if (expr.property === 'length') {
         return object.length;
       }
-      // Handle list method calls via property access (e.g., list.pop)
+
       if (expr.property === 'pop') {
         const popped = object.pop();
         return popped ?? null;
       }
       if (expr.property === 'contains') {
-        return false; // Should be handled differently
+        return false;
       }
       throw keyNotFound({ line: 0, column: 0 } as any, expr.property);
     }
@@ -747,7 +747,7 @@ export class Interpreter {
     console.log(output);
   }
 
-  // Statement executors
+
   private async executeSay(stmt: Stmt & { type: 'Say' }): Promise<void> {
     const value = await this.evaluate(stmt.expr);
     this._currentStyles = stmt.styles;

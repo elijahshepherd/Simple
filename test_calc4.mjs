@@ -17,7 +17,7 @@ console.log('Statements:', program.statements.length);
 
 const interpreter = new Interpreter();
 
-// Patch callUserFunction to debug
+
 const originalCallUserFunction = interpreter.callUserFunction.bind(interpreter);
 interpreter.callUserFunction = async function(name, args) {
   console.log('>>> callUserFunction:', name, 'args:', args);
