@@ -48,12 +48,13 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use a fixed delimiter that definitely won't appear in markdown content
-          DELIMITER="SIMPLE_RELEASE_EOF_1234567890"
-          
-          echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
-          cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "${DELIMITER}" >> $GITHUB_OUTPUT
+          # Copy the file content and use file output for multiline
+          cp "${{ steps.find_version.outputs.VERSION_FILE }}" /tmp/release_content.md
+          # Use GitHub's multiline string output format
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/release_content.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          rm /tmp/release_content.md
 
       - name: Run basic test
         run: |
