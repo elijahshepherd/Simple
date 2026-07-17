@@ -157,7 +157,7 @@ export default function Home() {
                       index={index}
                       onCopy={setFireworks}
                     />
-                  ))}
+                  )}
                 </div>
               </motion.div>
             )}
@@ -236,6 +236,10 @@ export default function Home() {
 
 function PlatformCard({ platform, index }: { platform: Platform; index: number }) {
   const [copied, setCopied] = useState<string | null>(null)
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
+  }
 
   return (
     <motion.article
@@ -360,7 +364,7 @@ function FireworksBackground({ active }: { active: boolean }) {
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt
+        this.vy += 0.3 * dt // gravity
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -402,11 +406,13 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+      // Spawn fireworks randomly
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
+      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -422,7 +428,7 @@ function FireworksBackground({ active }: { active: boolean }) {
 
     const spawnFirework = (x: number, y: number) => {
       const count = 30
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < 30; i++) {
         const p = new FireworkParticle(x, y)
         p.color = `hsl(${Math.random() * 360}, 100%, 60%)`
         particles.push(p)
