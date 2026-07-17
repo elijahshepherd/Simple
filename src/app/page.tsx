@@ -157,7 +157,7 @@ export default function Home() {
                       index={index}
                       onCopy={setFireworks}
                     />
-                  )}
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -365,7 +365,7 @@ function FireworksBackground({ active }: { active: boolean }) {
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt
+        this.vy += 0.3 * dt // gravity
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -389,41 +389,16 @@ function FireworksBackground({ active }: { active: boolean }) {
 
     const spawnFirework = (x: number, y: number) => {
       const count = 30
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < count; i++) {
         const p = new FireworkParticle(x, y)
         p.color = `hsl(${Math.random() * 360}, 100%, 60%)`
         particles.push(p)
       }
     }
 
-    const animate = (time: number) => {
-      const dt = (time - lastTime) / 1000
-      lastTime = time
-
-      const canvas = document.querySelector('canvas') as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      if (performance.now() - lastSpawn > 800) {
-        spawnFirework(Math.random() * window.innerWidth, Math.random() * canvas.height * 0.5)
-        lastSpawn = performance.now()
-      }
-
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i]
-        p.update(1/60)
-        if (p.life <= 0 || p.size < 0.5) {
-          particles.splice(i, 1)
-        } else {
-          p.draw(ctx)
-        }
-      }
-
-      requestAnimationFrame(animate)
-    }
+    let lastTime = performance.now()
+    let lastSpawn = 0
+    let animationId: number
 
     const animate = (time: number) => {
       const dt = (time - lastTime) / 1000
@@ -456,15 +431,12 @@ function FireworksBackground({ active }: { active: boolean }) {
 
     const spawnFirework = (x: number, y: number) => {
       const count = 30
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < count; i++) {
         const p = new FireworkParticle(x, y)
         p.color = `hsl(${Math.random() * 360}, 100%, 60%)`
         particles.push(p)
       }
     }
-
-    let lastTime = performance.now()
-    let animationId: number
 
     const animate = (time: number) => {
       const dt = (time - lastTime) / 1000
