@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { ChevronDown, Download, Terminal, Github, ExternalLink, FileText, FolderOpen, FileCode, Loader2, Check } from 'lucide-react'
 import { WindowsIcon, LinuxIcon, MacOSIcon } from '@/components/icons'
+import { useTheme } from '@/components/providers/theme-provider'
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
@@ -16,6 +17,7 @@ export default function Home() {
   const [fireworks, setFireworks] = useState(false)
   const logoRef = useRef<HTMLDivElement>(null)
   const platformRef = useRef<HTMLDivElement>(null)
+  const { resolvedTheme } = useTheme()
 
   useEffect(() => {
     setMounted(true)
@@ -209,12 +211,12 @@ export default function Home() {
           </motion.footer>
         </div>
 
-
+        
         <AnimatePresence>
           {fireworks && <FireworksBackground />}
         </AnimatePresence>
 
-
+        
         <AnimatePresence>
           {copied && (
             <motion.div
@@ -311,45 +313,6 @@ function CommandCard({ command, description }: { command: string; description: s
   )
 }
 
-function FireworksBackground() {
-  const { resolvedTheme } = useTheme()
-  return (
-    <div className="fixed inset-0 pointer-events-none z-40">
-      <FireworksBackground color={theme === 'dark' ? 'white' : 'black'} population={30} />
-    </div>
-  )
-}
-
-function CopyToast({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  if (!visible) return null
-  return (
-    <motion.div
-      className="fixed bottom-6 right-6 z-50 bg-[var(--accent)] text-[var(--bg)] px-6 py-4 rounded-xl shadow-xl"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-      className="flex items-center gap-3"
-      onClick={() => setTimeout(() => setCopied(null), 100)}
-    >
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-      <span>Copied to clipboard</span>
-    </motion.div>
-  )
-}
-
-function CommandCard({ command, description }: { command: string; description: string }) {
-  return (
-    <div className="flex items-center justify-between p-4 bg-[var(--bg)] border border-[var(--border)] rounded-xl hover:border-[var(--accent)] transition-colors">
-      <div>
-        <code className="font-mono text-sm font-medium">{command}</code>
-        <p className="text-xs text-[var(--fg-muted)] mt-0.5">{description}</p>
-      </div>
-      <ChevronRight className="w-5 h-5 text-[var(--fg-subtle)]" />
-    </div>
-  )
-}
-
 function FireworksBackground({ active }: { active: boolean }) {
   if (!active) return null
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -406,7 +369,7 @@ function FireworksBackground({ active }: { active: boolean }) {
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt
+        this.vy += 0.3 * dt // gravity
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -448,13 +411,13 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-
+      // Spawn fireworks randomly
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-
+      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -488,13 +451,13 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-
+      // Spawn fireworks randomly
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-
+      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -528,13 +491,13 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-
+      // Spawn fireworks randomly
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-
+      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
