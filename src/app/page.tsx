@@ -157,7 +157,7 @@ export default function Home() {
                       index={index}
                       onCopy={setFireworks}
                     />
-                  ))}
+                  )}
                 </div>
               </motion.div>
             )}
@@ -208,10 +208,12 @@ export default function Home() {
           </motion.footer>
         </div>
 
+        
         <AnimatePresence>
           {fireworks && <FireworksBackground />}
         </AnimatePresence>
 
+        
         <AnimatePresence>
           {copied && (
             <motion.div
@@ -235,6 +237,10 @@ export default function Home() {
 function PlatformCard({ platform, index }: { platform: Platform; index: number }) {
   const [expanded, setExpanded] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
+  }
 
   return (
     <motion.article
@@ -304,7 +310,8 @@ function CommandCard({ command, description }: { command: string; description: s
   )
 }
 
-function FireworksBackground() {
+function FireworksBackground({ active }: { active: boolean }) {
+  if (!active) return null
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
 
@@ -390,6 +397,9 @@ function FireworksBackground() {
       }
     }
 
+    let lastTime = performance.now()
+    let animationId: number
+
     const animate = (time: number) => {
       const dt = (time - lastTime) / 1000
       lastTime = time
@@ -401,13 +411,11 @@ function FireworksBackground() {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -421,14 +429,8 @@ function FireworksBackground() {
       animationId = requestAnimationFrame(animate)
     }
 
-    const spawnFirework = (x: number, y: number) => {
-      const count = 30
-      for (let i = 0; i < count; i++) {
-        const p = new FireworkParticle(x, y)
-        p.color = `hsl(${Math.random() * 360}, 100%, 60%)`
-        particles.push(p)
-      }
-    }
+    let lastTime = performance.now()
+    let animationId: number
 
     const animate = (time: number) => {
       const dt = (time - lastTime) / 1000
@@ -512,3 +514,5 @@ function FireworksBackground() {
 
   return <canvas className="fixed inset-0 pointer-events-none z-40" ref={canvasRef} />
 }
+
+export default Home
