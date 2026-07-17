@@ -41,8 +41,10 @@ npm start
 This project is deployed on **Vercel** with automatic deployments from the `main` branch.
 
 ### Live URL
-**https://elijahshepherd.github.io/Simple/** (GitHub Pages - legacy)
 **https://simple-lang.vercel.app** (Vercel - primary)
+
+### Legacy URL (GitHub Pages - deprecated)
+https://elijahshepherd.github.io/Simple/
 
 ### Environment Variables
 No environment variables required for the site itself.
@@ -52,7 +54,7 @@ No environment variables required for the site itself.
 |----------|---------------|-------|
 | Windows | `irm ... simple.exe` | PowerShell install script |
 | Linux | `curl ... | sudo mv` | Binary via curl |
-| macOS | `brew install` | Homebrew tap |
+| macOS | `brew install ...` | Homebrew tap |
 
 ### Built-in Commands
 After installation, these commands are available:
@@ -75,8 +77,7 @@ src/
 │   ├── providers/
 │   │   └── theme-provider.tsx
 │   ├── ui/
-│   │   ├── copy-button.tsx
-│   │   └── ...
+│   │   └── copy-button.tsx
 │   └── magicui/
 │       ├── fireworks.tsx
 │       └── ripple.tsx
