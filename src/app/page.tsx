@@ -91,7 +91,7 @@ export default function Home() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {fireworks && <FireworksBackground />}
+        {fireworks && <Fireworks />}
       </AnimatePresence>
 
       <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] transition-colors duration-300">
@@ -157,7 +157,7 @@ export default function Home() {
                       index={index}
                       onCopy={setFireworks}
                     />
-                  )}
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -208,12 +208,10 @@ export default function Home() {
           </motion.footer>
         </div>
 
-        
         <AnimatePresence>
           {fireworks && <FireworksBackground />}
         </AnimatePresence>
 
-        
         <AnimatePresence>
           {copied && (
             <motion.div
@@ -235,12 +233,7 @@ export default function Home() {
 }
 
 function PlatformCard({ platform, index }: { platform: Platform; index: number }) {
-  const [expanded, setExpanded] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
-
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
 
   return (
     <motion.article
@@ -366,7 +359,7 @@ function FireworksBackground({ active }: { active: boolean }) {
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt // gravity
+        this.vy += 0.3 * dt
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -397,9 +390,6 @@ function FireworksBackground({ active }: { active: boolean }) {
       }
     }
 
-    let lastTime = performance.now()
-    let animationId: number
-
     const animate = (time: number) => {
       const dt = (time - lastTime) / 1000
       lastTime = time
@@ -416,40 +406,6 @@ function FireworksBackground({ active }: { active: boolean }) {
         lastSpawn = performance.now()
       }
 
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i]
-        p.update(1/60)
-        if (p.life <= 0 || p.size < 0.5) {
-          particles.splice(i, 1)
-        } else {
-          p.draw(ctx)
-        }
-      }
-
-      animationId = requestAnimationFrame(animate)
-    }
-
-    let lastTime = performance.now()
-    let animationId: number
-
-    const animate = (time: number) => {
-      const dt = (time - lastTime) / 1000
-      lastTime = time
-
-      const canvas = document.querySelector('canvas') as HTMLCanvasElement
-      if (!canvas) return
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      // Spawn fireworks randomly
-      if (performance.now() - lastSpawn > 800) {
-        spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
-        lastSpawn = performance.now()
-      }
-
-      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -483,13 +439,11 @@ function FireworksBackground({ active }: { active: boolean }) {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Spawn fireworks randomly
       if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
         lastSpawn = performance.now()
       }
 
-      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -514,5 +468,3 @@ function FireworksBackground({ active }: { active: boolean }) {
 
   return <canvas className="fixed inset-0 pointer-events-none z-40" ref={canvasRef} />
 }
-
-export default Home
