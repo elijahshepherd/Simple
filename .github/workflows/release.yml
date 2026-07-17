@@ -48,10 +48,12 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use heredoc for multiline output - no encoding needed
-          echo "content<<EOF" >> $GITHUB_OUTPUT
+          # Use a unique delimiter that won't appear in markdown content
+          DELIMITER="SIMPLE_RELEASE_BOUNDARY_$(date +%s%N)"
+          
+          echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
           cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "${DELIMITER}" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
