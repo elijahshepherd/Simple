@@ -48,13 +48,9 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Copy the file content and use file output for multiline
-          cp "${{ steps.find_version.outputs.VERSION_FILE }}" /tmp/release_content.md
-          # Use GitHub's multiline string output format
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          cat /tmp/release_content.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          rm /tmp/release_content.md
+          # Use file output for multiline content - this is the most reliable method
+          cat "${{ steps.find_version.outputs.VERSION_FILE }}" > /tmp/release_body.md
+          echo "body_file=/tmp/release_body.md" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
@@ -95,21 +91,4 @@ jobs:
           generate_release_notes: false
           files: |
             dist-binaries/simple.exe
-          body: ${{ steps.read_version_file.outputs.content }}
-
-            ---
-            **Download:** [simple.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag_name.outputs.TAG_NAME }}/simple.exe)
-
-            **Installation:**
-            1. Download `simple.exe` from the assets below
-            2. Run `simple.exe` - it will show a welcome screen and offer to install
-            3. After installation, open a **new terminal** and run `simple run-example hello`
-
-            **Built-in Examples:**
-            - `simple run-example hello` - Hello world with colors
-            - `simple run-example calculator` - Interactive calculator
-            - `simple run-example functions` - Functions and recursion
-            - `simple run-example lists` - List operations
-            - `simple run-example loops` - Various loop types
-            - `simple run-example conditions` - If/else conditions
-            - `simple examples` - List all examples
+          body_path: ${{ steps.read_version_file.outputs.body_file }}
