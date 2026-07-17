@@ -48,12 +48,14 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use a unique delimiter that won't appear in markdown content
+          # Generate unique delimiter and save to temp file
           DELIMITER="SIMPLE_RELEASE_BOUNDARY_$(date +%s%N)"
+          echo "$DELIMITER" > /tmp/delimiter.txt
           
-          echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
+          echo "content<<$DELIMITER" >> $GITHUB_OUTPUT
           cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
-          echo "${DELIMITER}" >> $GITHUB_OUTPUT
+          echo "$(cat /tmp/delimiter.txt)" >> $GITHUB_OUTPUT
+          rm /tmp/delimiter.txt
 
       - name: Run basic test
         run: |
