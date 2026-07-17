@@ -1,4 +1,4 @@
-name: Build & Deploy to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -10,13 +10,9 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  build:
-    name: Build Windows Executable
+  build-and-deploy:
+    name: Build & Deploy to GitHub Pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -34,76 +30,101 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Build Windows executable with pkg
+      - name: Package Windows executable with pkg
         run: |
           npm install -g pkg
-          pkg . --targets node18-win-x64 --output simple.exe
+          pkg . --targets node18-win-x64 --out-path dist-binaries
 
-      - name: Upload executable as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: simple-windows
-          path: simple.exe
-          retention-days: 30
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Download executable
-        uses: actions/download-artifact@v4
-        with:
-          name: simple-windows
-          path: ./public
-
-      - name: Create index.html for download page
+      - name: Create download page
         run: |
-          cat > ./public/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Simple Programming Language - Download</title>
-            <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
-              .download-btn { display: inline-block; background: #0078d4; color: white; padding: 15px 30px; border-radius: 5px; text-decoration: none; font-size: 18px; font-weight: bold; }
-              .download-btn:hover { background: #106ebe; }
-              .info { margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 5px; }
-              code { background: #eee; padding: 2px 6px; border-radius: 3px; }
-            </style>
-          </head>
-          <body>
-            <h1>Simple Programming Language</h1>
-            <p>Version 1.5.0 - Beginner-friendly programming language with natural English syntax</p>
-            
-            <a href="simple.exe" class="download-btn" download>Download simple.exe for Windows</a>
-            
-            <div class="info">
-              <h3>Installation</h3>
-              <ol>
-                <li>Download <code>simple.exe</code> above</li>
-                <li>Run it - a welcome screen will appear</li>
-                <li>Click "Install" to add to PATH and create Start Menu shortcuts</li>
-                <li>Open a <b>new terminal</b> and run <code>simple run-example hello</code></li>
-              </ol>
-              <p><strong>No Node.js required</strong> - completely standalone executable (~38 MB)</p>
-            </div>
-          </body>
-          </html>
-          EOF
+          mkdir -p public
+          cat > public/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple - Download</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 3rem;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .logo { font-size: 3rem; margin-bottom: 1rem; }
+    h1 { color: #333; margin-bottom: 0.5rem; }
+    .version { color: #666; margin-bottom: 2rem; }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
+    .btn:active { transform: translateY(0); }
+    .info { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eee; color: #666; font-size: 0.9rem; }
+    .info a { color: #667eea; text-decoration: none; }
+    .features { margin-top: 1.5rem; text-align: left; }
+    .feature { display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; color: #555; }
+    .feature::before { content: "✓"; color: #667eea; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">💚</div>
+    <h1>Simple Programming Language</h1>
+    <p class="version">Version 1.5.0</p>
+    
+    <a href="simple.exe" class="btn" download>
+      Download simple.exe (38 MB)
+    </a>
+    
+    <div class="features">
+      <div class="feature">Standalone executable - no Node.js needed</div>
+      <div class="feature">Auto-installs to PATH on first run</div>
+      <div class="feature">Start Menu shortcuts created</div>
+      <div class="feature">Clean uninstall via Windows Settings</div>
+    </div>
+    
+    <div class="info">
+      <p>After download, run <code>simple.exe</code> → click <strong>Install</strong></p>
+      <p>Then open a <strong>new terminal</strong> and run <code>simple run-example hello</code></p>
+      <p><a href="https://github.com/elijahshepherd/Simple">View on GitHub</a> · <a href="https://elijahshepherd.github.io/Simple/">Latest Release</a></p>
+    </div>
+  </div>
+</body>
+</html>
+EOF
+          
+          # Copy the executable
+          cp dist-binaries/simple.exe public/simple.exe
+          
+          # Create .nojekyll to bypass Jekyll processing
+          touch public/.nojekyll
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload to GitHub Pages
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./public
+          path: public
 
       - name: Deploy to GitHub Pages
         id: deployment
