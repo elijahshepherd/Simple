@@ -20,23 +20,18 @@ export default function Home() {
   useEffect(() => {
     setMounted(true)
 
-
     setShowRipple(true)
     setTimeout(() => setShowRipple(false), 1000)
 
-
     setTimeout(() => setLogoVisible(true), 1500)
 
-
     setTimeout(() => setPlatformVisible(true), 3000)
-
 
     setTimeout(() => {
       setSectionsVisible({...sectionsVisible, windows: true})
       setTimeout(() => setSectionsVisible({...sectionsVisible, linux: true}), 200)
       setTimeout(() => setSectionsVisible({...sectionsVisible, macos: true}), 400)
     }, 5000)
-
 
   }, [])
 
@@ -93,7 +88,6 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
-
       
       <AnimatePresence>
         {fireworks && <Fireworks />}
@@ -133,7 +127,6 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
-
           
           <AnimatePresence>
             {mounted && (
@@ -170,7 +163,6 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
-
           
           <AnimatePresence>
             {mounted && (
@@ -197,7 +189,6 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
-
           
           <motion.footer
             className="w-full text-center py-12 border-t border-[var(--border)] text-[var(--fg-subtle)] text-sm"
@@ -362,19 +353,34 @@ function CommandCard({ command, description }: { command: string; description: s
 function FireworksBackground({ active }: { active: boolean }) {
   if (!active) return null
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { resolvedTheme } = useTheme()
+  const animationRef = useRef<number>()
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const canvas = document.createElement('canvas')
+    canvas.style.position = 'fixed'
+    canvas.style.inset = '0'
+    canvas.style.pointerEvents = 'none'
+    canvas.style.zIndex = '40'
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    document.body.appendChild(canvas)
+
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-
     const particles: FireworkParticle[] = []
-    const theme = 'dark'
+    let lastTime = performance.now()
+
+    interface FireworkParticle {
+      x: number
+      y: number
+      vx: number
+      vy: number
+      color: string
+      life: number
+      maxLife: number
+      size: number
+    }
 
     class FireworkParticle {
       x: number
@@ -400,7 +406,7 @@ function FireworksBackground({ active }: { active: boolean }) {
       update(dt: number) {
         this.x += this.vx * dt
         this.y += this.vy * dt
-        this.vy += 0.3 * dt
+        this.vy += 0.3 * dt // gravity
         this.life -= dt * 0.5
         this.size *= 0.98
       }
@@ -419,6 +425,8 @@ function FireworksBackground({ active }: { active: boolean }) {
 
     const particles: FireworkParticle[] = []
     let lastTime = performance.now()
+    let lastSpawn = 0
+    let animationId: number
 
     const spawnFirework = (x: number, y: number) => {
       const count = 30
@@ -429,25 +437,104 @@ function FireworksBackground({ active }: { active: boolean }) {
       }
     }
 
-    let lastSpawn = 0
-    let animationId: number
-
     const animate = (time: number) => {
       const dt = (time - lastTime) / 1000
       lastTime = time
 
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement
+      if (!canvas) return
       const ctx = canvas.getContext('2d')
       if (!ctx) return
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-
-      if (time - lastSpawn > 800) {
+      // Spawn fireworks randomly
+      if (performance.now() - lastSpawn > 800) {
         spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
-        lastSpawn = time
+        lastSpawn = performance.now()
       }
 
+      // Update and draw particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]
+        p.update(1/60)
+        if (p.life <= 0 || p.size < 0.5) {
+          particles.splice(i, 1)
+        } else {
+          p.draw(ctx)
+        }
+      }
 
+      animationId = requestAnimationFrame(animate)
+    }
+
+    const spawnFirework = (x: number, y: number) => {
+      const count = 30
+      for (let i = 0; i < count; i++) {
+        const p = new FireworkParticle(x, y)
+        p.color = `hsl(${Math.random() * 360}, 100%, 60%)`
+        particles.push(p)
+      }
+    }
+
+    const animate = (time: number) => {
+      const dt = (time - lastTime) / 1000
+      lastTime = time
+
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Spawn fireworks randomly
+      if (performance.now() - lastSpawn > 800) {
+        spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
+        lastSpawn = performance.now()
+      }
+
+      // Update and draw particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]
+        p.update(1/60)
+        if (p.life <= 0 || p.size < 0.5) {
+          particles.splice(i, 1)
+        } else {
+          p.draw(ctx)
+        }
+      }
+
+      animationId = requestAnimationFrame(animate)
+    }
+
+    const spawnFirework = (x: number, y: number) => {
+      const count = 30
+      for (let i = 0; i < count; i++) {
+        const p = new FireworkParticle(x, y)
+        p.color = `hsl(${Math.random() * 360}, 100%, 60%)`
+        particles.push(p)
+      }
+    }
+
+    const animate = (time: number) => {
+      const dt = (time - lastTime) / 1000
+      lastTime = time
+
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Spawn fireworks randomly
+      if (performance.now() - lastSpawn > 800) {
+        spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
+        lastSpawn = performance.now()
+      }
+
+      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]
         p.update(1/60)
@@ -463,10 +550,12 @@ function FireworksBackground({ active }: { active: boolean }) {
 
     animationId = requestAnimationFrame(animate)
 
-    return () => cancelAnimationFrame(animationId)
+    return () => {
+      cancelAnimationFrame(animationId)
+      const canvas = document.querySelector('canvas')
+      if (canvas) canvas.remove()
+    }
   }, [])
 
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-40" />
+  return <canvas className="fixed inset-0 pointer-events-none z-40" ref={canvasRef} />
 }
-
-export default Home
