@@ -1,4 +1,4 @@
-name: Deploy Changelog to GitHub Pages
+name: Deploy Changelog Site
 
 on:
   push:
@@ -9,6 +9,10 @@ permissions:
   contents: read
   pages: write
   id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
@@ -30,16 +34,16 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Package Windows executable with pkg
+      - name: Build Windows executable
         run: |
           npm install -g pkg
           pkg . --targets node18-win-x64 --out-path dist-binaries
 
-      - name: Generate changelog site
+      - name: Build changelog site
         run: |
           mkdir -p public
           
-          # Read all version files and create the site
+          # Generate the changelog site
           node -e "
             const fs = require('fs');
             const path = require('path');
@@ -51,159 +55,20 @@ jobs:
                 const va = a.replace('.md', '').split('.').map(Number);
                 const vb = b.replace('.md', '').split('.').map(Number);
                 for (let i = 0; i < Math.max(va.length, vb.length); i++) {
-                  const a = va[i] || 0;
-                  const b = vb[i] || 0;
-                  if (a !== b) return b - a; // descending
+                  const na = va[i] || 0;
+                  const nb = vb[i] || 0;
+                  if (na !== nb) return nb - na; // descending
                 }
                 return 0;
               });
             
-            let html = \`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple - Changelog</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #fafafa;
-      color: #1a1a1a;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 3rem;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    .logo { font-size: 3rem; margin-bottom: 0.5rem; }
-    h1 { font-size: 2.5rem; font-weight: 600; letter-spacing: -0.02em; }
-    .subtitle { color: #666; margin-top: 0.5rem; font-size: 1.1rem; }
-    .warning {
-      background: #fff5f5;
-      border: 1px solid #fed7d7;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    .warning-icon { font-size: 1.5rem; flex-shrink: 0; }
-    .warning-text { flex: 1; }
-    .warning-text strong { display: block; margin-bottom: 0.5rem; color: #c53030; }
-    .warning-text code { background: #fed7d7; padding: 0.15rem 0.4rem; border-radius: 4px; }
-    .btn {
-      display: inline-block;
-      background: #1a1a1a;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1.1rem;
-      transition: background 0.2s, transform 0.2s;
-      border: none;
-      cursor: pointer;
-    }
-    .btn:hover { background: #333; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .download-section {
-      text-align: center;
-      margin: 2rem 0 3rem;
-    }
-    .version-card {
-      background: white;
-      border: 1px solid #e8e8e8;
-      border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 1.5rem;
-      transition: box-shadow 0.2s;
-    }
-    .version-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
-    .version-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 1rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .version-tag {
-      background: #1a1a1a;
-      color: white;
-      padding: 0.4rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1.1rem;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-    }
-    .version-date { color: #888; font-size: 0.9rem; }
-    .version-content { color: #333; }
-    .version-content h3 { font-size: 1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: #1a1a1a; }
-    .version-content h3:first-child { margin-top: 0; }
-    .version-content ul { margin-left: 1.5rem; }
-    .version-content li { margin: 0.4rem 0; }
-    .version-content code { 
-      background: #f5f5f5; 
-      padding: 0.15rem 0.4rem; 
-      border-radius: 4px; 
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 0.9em;
-    }
-    .version-content hr { border: none; border-top: 1px solid #eee; margin: 1.5rem 0; }
-    footer {
-      text-align: center;
-      color: #999;
-      font-size: 0.85rem;
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid #eee;
-    }
-    @media (max-width: 600px) {
-      .container { padding: 2rem 1rem; }
-      h1 { font-size: 2rem; }
-      .version-card { padding: 1.5rem; }
-    }
-  </style>
-</head>
-<body>
-  <div class=\"container\">
-    <header>
-      <div class=\"logo\">💚</div>
-      <h1>Simple</h1>
-      <p class=\"subtitle\">Changelog — All Versions</p>
-    </header>
-    
-    <div class=\"warning\">
-      <span class=\"warning-icon\">⚠</span>
-      <div class=\"warning-text\">
-        <strong>Important:</strong> Simple is a standalone Windows executable. 
-        Download <code>simple.exe</code> below, run it, click <strong>Install</strong>, 
-        then open a <strong>new terminal</strong> to use <code>simple</code> commands.
-      </div>
-    </div>
-    
-    <div class=\"download-section\">
-      <a href=\"simple.exe\" class=\"btn\" download>Download simple.exe</a>
-    </div>
-    
-    <main>
-\`;
+            let allVersions = [];
             
             for (const file of files) {
               const content = fs.readFileSync(path.join(releaseDir, file), 'utf8');
               const version = file.replace('.md', '');
               
-              // Extract date from content
+              // Extract date
               const dateMatch = content.match(/Date:\s*([^\n]+)/i);
               const date = dateMatch ? dateMatch[1].trim() : '';
               
@@ -229,21 +94,172 @@ jobs:
                 sections.push({ title: currentSection, items: currentItems });
               }
               
-              html += \`    <article class=\"version-card\">
-      <div class=\"version-header\">
-        <span class=\"version-tag\">v\${version}</span>
-        <span class=\"version-date\">\${date}</span>
+              allVersions.push({ version, date, sections });
+            }
+            
+            // Generate HTML
+            let html = \`<<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple - Changelog</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    /* Warning banner */
+    .warning {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .warning h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    .warning p { font-size: 0.95rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+    .warning a { color: #fff; text-decoration: underline; font-weight: 500; }
+    .warning .btn {
+      display: inline-block;
+      margin-top: 16px;
+      background: #fff;
+      color: #1a1a1a;
+      padding: 12px 28px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .warning .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,0.3); }
+    
+    header { text-align: center; margin-bottom: 40px; }
+    .logo { font-size: 2.5rem; margin-bottom: 8px; }
+    h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .subtitle { color: #666; font-size: 1.1rem; font-weight: 400; }
+    
+    .version-grid { display: flex; flex-direction: column; gap: 16px; }
+    .version-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .version-card:hover { border-color: #d0d0d0; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
+    
+    .version-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .version-tag {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .version-date { color: #888; font-size: 0.9rem; }
+    
+    .version-content h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin: 20px 0 8px;
+      font-weight: 600;
+    }
+    .version-content h3:first-child { margin-top: 0; }
+    .version-content ul { list-style: none; padding: 0; }
+    .version-content li {
+      position: relative;
+      padding-left: 20px;
+      margin: 6px 0;
+      color: #333;
+      font-size: 0.95rem;
+    }
+    .version-content li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 6px;
+      height: 6px;
+      background: #1a1a1a;
+      border-radius: 50%;
+    }
+    .version-content code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    
+    footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+    }
+    footer a { color: #888; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    
+    @media (max-width: 600px) {
+      .container { padding: 24px 16px; }
+      h1 { font-size: 1.8rem; }
+      .version-tag { font-size: 1.1rem; }
+      .version-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Warning banner -->
+    <div class="warning">
+      <h2>⚠️ Important: Standalone Windows Executable</h2>
+      <p>Simple is a <strong>standalone Windows executable</strong> that installs itself. No Node.js, Python, or any runtime required.</      <p>Download <code>simple.exe</code>, run it, click <strong>Install</strong>, then open a <strong>new terminal</strong> to use <code>simple</code> commands.</      <a href="simple.exe" class="btn" download>Download simple.exe</a>
+    </div>
+    
+    <header>
+      <div class="logo">Simple</div>
+      <h1>Changelog</h1>
+      <p class="subtitle">All versions and changes</p>
+    </header>
+    
+    <div class="version-grid">\`;
+            
+            for (const v of allVersions) {
+              html += \`    <article class="version-card">
+      <div class="version-header">
+        <span class="version-tag">v\${v.version}</span>
+        <span class="version-date">\${v.date}</span>
       </div>
-      <div class=\"version-content\">\`;
+      <div class="version-content">\`;
               
-              for (const section of sections) {
+              for (const section of v.sections) {
                 if (section.title) {
                   html += \`<h3>\${section.title}</h3>\`;
                 }
                 if (section.items.length) {
                   html += '<ul>';
                   for (const item of section.items) {
-                    // Convert markdown code to HTML
                     const itemHtml = item.replace(/\`([^\`]+)\`/g, '<code>$1</code>');
                     html += \`<li>\${itemHtml}</li>\`;
                   }
@@ -255,9 +271,9 @@ jobs:
     </article>\`;
             }
             
-            html += \`    </main>
+            html += \`    </div>
     <footer>
-      <p>Simple Programming Language • <a href=\"https://github.com/elijahshepherd/Simple\" style=\"color: #888;\">GitHub</a></p>
+      <p>Simple Programming Language · <a href="https://github.com/elijahshepherd/Simple" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/elijahshepherd/Simple/issues" target="_blank" rel="noopener">Issues</a></p>
     </footer>
   </div>
 </body>
@@ -271,6 +287,9 @@ jobs:
           
           # Create .nojekyll
           touch public/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
