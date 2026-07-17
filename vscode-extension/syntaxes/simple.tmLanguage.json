@@ -1,0 +1,139 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Simple",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#identifiers" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.simple",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.flow.simple",
+          "match": "\\b(if|otherwise|end|repeat|times|while|function|return|call|with|import|as|wait|seconds|clear|exit)\\b"
+        },
+        {
+          "name": "keyword.declaration.simple",
+          "match": "\\b(remember|constant)\\b"
+        },
+        {
+          "name": "keyword.io.simple",
+          "match": "\\b(say|ask|into)\\b"
+        },
+        {
+          "name": "keyword.file.simple",
+          "match": "\\b(create|delete|write|append|read|into|file|folder|make|list|copy|move|rename|exists|path|join|dir|name|ext)\\b"
+        },
+        {
+          "name": "keyword.system.simple",
+          "match": "\\b(args|env|get|set|run|platform|arch)\\b"
+        },
+        {
+          "name": "keyword.random.simple",
+          "match": "\\b(random|int|float|choice|shuffle|bool)\\b"
+        },
+        {
+          "name": "keyword.time.simple",
+          "match": "\\b(now|sleep|format|parse|year|month|day|hour|minute|second|timestamp)\\b"
+        },
+        {
+          "name": "keyword.text.simple",
+          "match": "\\b(text|upper|lower|trim|split|join|replace|length|contains|starts with|ends with|substring|by)\\b"
+        },
+        {
+          "name": "keyword.math.simple",
+          "match": "\\b(math|abs|round|floor|ceil|sqrt|pow|min|max|clamp|random|pi|e)\\b"
+        },
+        {
+          "name": "keyword.color.simple",
+          "match": "\\b(red|green|blue|yellow|cyan|magenta|white|black|bright|bold|italic|underline|reset|bg_red|bg_green|bg_blue|bg_yellow|bg_cyan|bg_magenta|bg_white|bg_black)\\b"
+        },
+        {
+          "name": "keyword.logical.simple",
+          "match": "\\b(and|or|not)\\b"
+        },
+        {
+          "name": "keyword.comparison.simple",
+          "match": "\\b(is|is not|greater than|less than|greater than or equal|less than or equal|greater or equal|less or equal|equal)\\b"
+        },
+        {
+          "name": "keyword.arithmetic.simple",
+          "match": "\\b(plus|minus|multiply|divided by|mod)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.simple",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            { "name": "constant.character.escape.simple", "match": "\\\\." }
+          ]
+        },
+        {
+          "name": "string.quoted.single.simple",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            { "name": "constant.character.escape.simple", "match": "\\\\." }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.simple",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.simple",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        { "name": "keyword.operator.arithmetic.simple", "match": "\\+|-|\\*|/" },
+        { "name": "keyword.operator.modulo.simple", "match": "%" },
+        { "name": "keyword.operator.comparison.simple", "match": "==" },
+        { "name": "keyword.operator.logical.simple", "match": "&&|\\|\\||!" }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.simple",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        { "name": "punctuation.bracket.round.simple", "match": "[\\(\\)]" },
+        { "name": "punctuation.bracket.square.simple", "match": "[\\[\\]]" },
+        { "name": "punctuation.bracket.curly.simple", "match": "[\\{\\}]" },
+        { "name": "punctuation.separator.comma.simple", "match": "," },
+        { "name": "punctuation.separator.colon.simple", "match": ":" },
+        { "name": "punctuation.accessor.dot.simple", "match": "\\." },
+        { "name": "punctuation.arrow.simple", "match": "->" }
+      ]
+    }
+  },
+  "scopeName": "source.simple"
+}

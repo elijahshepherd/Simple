@@ -1,0 +1,64 @@
+{
+  "name": "simple-language",
+  "displayName": "Simple Programming Language",
+  "description": "Language support for Simple - The beginner-friendly programming language with natural English syntax",
+  "version": "1.5.0",
+  "publisher": "elijahshepherd",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "simple",
+    "language",
+    "beginner",
+    "english",
+    "education"
+  ],
+  "icon": "images/simple-icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elijahshepherd/Simple"
+  },
+  "bugs": {
+    "url": "https://github.com/elijahshepherd/Simple/issues"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "simple",
+        "aliases": [
+          "Simple",
+          "simple"
+        ],
+        "extensions": [
+          ".spml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "simple",
+        "scopeName": "source.simple",
+        "path": "./syntaxes/simple.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "simple",
+        "path": "./snippets/simple.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "echo 'No compilation needed'",
+    "test": "echo 'Tests passed'"
+  },
+  "devDependencies": {
+    "vscode": "^1.1.37"
+  }
+}

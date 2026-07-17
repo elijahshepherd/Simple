@@ -1,0 +1,207 @@
+{
+  "Hello World": {
+    "prefix": "simple-hello",
+    "body": [
+      "say \"Hello, World!\"",
+      "",
+      "remember name as \"World\"",
+      "say \"Hello, \" name \"!\""
+    ],
+    "description": "Basic Hello World example"
+  },
+  "Variables": {
+    "prefix": "simple-vars",
+    "body": [
+      "remember name as \"Simple\"",
+      "remember version as 1.0",
+      "remember awesome as true",
+      "say \"Language: \" name",
+      "say \"Version: \" version",
+      "say \"Awesome: \" awesome"
+    ],
+    "description": "Variable declaration examples"
+  },
+  "Math Operations": {
+    "prefix": "simple-math",
+    "body": [
+      "say \"2 + 3 = \" (2 plus 3)",
+      "say \"10 - 4 = \" (10 minus 4)",
+      "say \"6 * 7 = \" (6 multiply 7)",
+      "say \"20 / 4 = \" (20 divided by 4)",
+      "say \"17 % 5 = \" (17 mod 5)"
+    ],
+    "description": "Math operation examples"
+  },
+  "If Statement": {
+    "prefix": "simple-if",
+    "body": [
+      "remember score as 85",
+      "",
+      "if score is greater than or equal to 90",
+      "  say green \"Grade: A\"",
+      "otherwise if score is greater than or equal to 80",
+      "  say green \"Grade: B\"",
+      "otherwise if score is greater than or equal to 70",
+      "  say yellow \"Grade: C\"",
+      "otherwise if score is greater than or equal to 60",
+      "  say yellow \"Grade: D\"",
+      "otherwise",
+      "  say red \"Grade: F\"",
+      "end"
+    ],
+    "description": "If/otherwise/end conditional example"
+  },
+  "Repeat Times": {
+    "prefix": "simple-repeat-times",
+    "body": [
+      "repeat 5 times",
+      "  say \"Iteration\"",
+      "end"
+    ],
+    "description": "Repeat N times loop"
+  },
+  "Repeat With Counter": {
+    "prefix": "simple-repeat-counter",
+    "body": [
+      "remember i as 1",
+      "repeat 5 times",
+      "  say \"Count: \" i",
+      "  remember i as i plus 1",
+      "end"
+    ],
+    "description": "Repeat with counter variable"
+  },
+  "While Loop": {
+    "prefix": "simple-while",
+    "body": [
+      "remember n as 5",
+      "repeat while n is greater than 0",
+      "  say n",
+      "  remember n as n minus 1",
+      "end",
+      "say \"Go!\""
+    ],
+    "description": "While loop with countdown"
+  },
+  "Function": {
+    "prefix": "simple-function",
+    "body": [
+      "function greet with name",
+      "  return \"Hello, \" name \"!\"",
+      "end",
+      "",
+      "say call greet with \"World\""
+    ],
+    "description": "Simple function definition and call"
+  },
+  "Function With Multiple Parameters": {
+    "prefix": "simple-function-multi",
+    "body": [
+      "function add with a, b",
+      "  return a plus b",
+      "end",
+      "",
+      "say \"5 + 3 = \" call add with 5, 3"
+    ],
+    "description": "Function with multiple parameters"
+  },
+  "Ask Input": {
+    "prefix": "simple-ask",
+    "body": [
+      "ask \"What is your name?\" into name",
+      "say \"Hello, \" name \"!\""
+    ],
+    "description": "Ask for user input"
+  },
+  "List Operations": {
+    "prefix": "simple-list",
+    "body": [
+      "remember numbers as [1, 2, 3, 4, 5]",
+      "numbers.push 6",
+      "say \"After push: \" numbers",
+      "",
+      "remember popped as numbers.pop",
+      "say \"Popped: \" popped \", Remaining: \" numbers",
+      "",
+      "say \"Length: \" numbers.length",
+      "say \"Contains 3: \" numbers.contains 3",
+      "say \"Index of 4: \" numbers.indexOf 4"
+    ],
+    "description": "List operations example"
+  },
+  "Random Numbers": {
+    "prefix": "simple-random",
+    "body": [
+      "random.int 1 to 100 into num",
+      "say \"Random integer: \" num",
+      "",
+      "random.float 0.0 to 1.0 into f",
+      "say \"Random float: \" f",
+      "",
+      "random.choice from [\"apple\", \"banana\", \"cherry\"] into choice",
+      "say \"Random choice: \" choice"
+    ],
+    "description": "Random number generation examples"
+  },
+  "File Operations": {
+    "prefix": "simple-file",
+    "body": [
+      "create file \"output.txt\"",
+      "write \"Hello, File!\" into \"output.txt\"",
+      "read \"output.txt\" into content",
+      "say \"File content: \" content",
+      "",
+      "file.exists \"output.txt\" into exists",
+      say \"File exists: \" exists"
+    ],
+    "description": "File I/O operations"
+  },
+  "Text Operations": {
+    "prefix": "simple-text",
+    "body": [
+      "remember text as \"Hello World\"",
+      "text.upper text into upper",
+      "say \"Upper: \" upper",
+      "",
+      "text.lower text into lower",
+      "say \"Lower: \" lower",
+      "",
+      "text.length text into len",
+      "say \"Length: \" len",
+      "",
+      "text.contains text \"World\" into has",
+      "say \"Contains World: \" has"
+    ],
+    "description": "Text manipulation examples"
+  },
+  "Time Operations": {
+    "prefix": "simple-time",
+    "body": [
+      "now into timestamp",
+      "say \"Current time: \" timestamp",
+      "",
+      "time.format timestamp \"YYYY-MM-DD HH:mm:ss\" into formatted",
+      "say \"Formatted: \" formatted",
+      "",
+      "time.year timestamp into year",
+      "time.month timestamp into month",
+      "time.day timestamp into day",
+      "say \"Date: \" year \"-\" month \"-\" day"
+    ],
+    "description": "Time and date operations"
+  },
+  "Project Scaffold": {
+    "prefix": "simple-project",
+    "body": [
+      "# My Simple Project",
+      "",
+      "say \"Hello from My Project!\"",
+      "",
+      "remember name as \"World\"",
+      "say \"Hello, \" name \"!\"",
+      "",
+      "# Your code here"
+    ],
+    "description": "Basic project structure"
+  }
+}
