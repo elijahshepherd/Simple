@@ -7,6 +7,6 @@
 
 > The name says it all. With Simple, you can write code using real plain English, not just simplified syntax that still feels like traditional programming. Create, experiment, and bring your ideas to life without needing to learn complex rules first.
 
-> Get started by visiting the newest release on GitHub, installing Simple, and begin coding right away. This is version `1.0`, which currently focuses on console-based features, with many more improvements and capabilities planned for the future.
+> Get started by visiting the newest release on GitHub, installing Simple, and begin coding right away. Currently, Simple focuses on console-based features, with many more improvements and capabilities planned for the future.
 
 > **Only supported on Windows**
