@@ -91,7 +91,7 @@ export default function Home() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {fireworks && <Fireworks />}
+        {fireworks && <FireworksBackground />}
       </AnimatePresence>
 
       <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] transition-colors duration-300">
@@ -208,10 +208,12 @@ export default function Home() {
           </motion.footer>
         </div>
 
+        
         <AnimatePresence>
           {fireworks && <FireworksBackground />}
         </AnimatePresence>
 
+        
         <AnimatePresence>
           {copied && (
             <motion.div
@@ -306,7 +308,6 @@ function CommandCard({ command, description }: { command: string; description: s
 function FireworksBackground({ active }: { active: boolean }) {
   if (!active) return null
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationRef = useRef<number>()
 
   useEffect(() => {
     const canvas = document.createElement('canvas')
@@ -457,6 +458,44 @@ function FireworksBackground({ active }: { active: boolean }) {
       animationId = requestAnimationFrame(animate)
     }
 
+    const spawnFirework = (x: number, y: number) => {
+      const count = 30
+      for (let i = 0; i < count; i++) {
+        const p = new FireworkParticle(x, y)
+        p.color = `hsl(${Math.random() * 360}, 100%, 60%)`
+        particles.push(p)
+      }
+    }
+
+    const animate = (time: number) => {
+      const dt = (time - lastTime) / 1000
+      lastTime = time
+
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      if (performance.now() - lastSpawn > 800) {
+        spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5)
+        lastSpawn = performance.now()
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]
+        p.update(1/60)
+        if (p.life <= 0 || p.size < 0.5) {
+          particles.splice(i, 1)
+        } else {
+          p.draw(ctx)
+        }
+      }
+
+      animationId = requestAnimationFrame(animate)
+    }
+
     animationId = requestAnimationFrame(animate)
 
     return () => {
@@ -468,3 +507,5 @@ function FireworksBackground({ active }: { active: boolean }) {
 
   return <canvas className="fixed inset-0 pointer-events-none z-40" ref={canvasRef} />
 }
+
+export default Home
