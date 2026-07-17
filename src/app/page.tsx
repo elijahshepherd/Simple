@@ -91,7 +91,7 @@ export default function Home() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {fireworks && <Fireworks />}
+        {fireworks && <FireworksBackground />}
       </AnimatePresence>
 
       <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] transition-colors duration-300">
