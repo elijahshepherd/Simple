@@ -75,7 +75,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] transition-colors duration-300">
-
       <AnimatePresence>
         {showRipple && (
           <motion.div
@@ -96,9 +95,7 @@ export default function Home() {
       </AnimatePresence>
 
       <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] transition-colors duration-300">
-
         <div className="min-h-screen flex flex-col items-center justify-center px-4 relative">
-
           <AnimatePresence mode="wait">
             {logoVisible && (
               <motion.div
@@ -211,12 +208,10 @@ export default function Home() {
           </motion.footer>
         </div>
 
-        
         <AnimatePresence>
           {fireworks && <FireworksBackground />}
         </AnimatePresence>
 
-        
         <AnimatePresence>
           {copied && (
             <motion.div
@@ -240,10 +235,6 @@ export default function Home() {
 function PlatformCard({ platform, index }: { platform: Platform; index: number }) {
   const [expanded, setExpanded] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
-
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
 
   return (
     <motion.article
@@ -313,8 +304,7 @@ function CommandCard({ command, description }: { command: string; description: s
   )
 }
 
-function FireworksBackground({ active }: { active: boolean }) {
-  if (!active) return null
+function FireworksBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
 
