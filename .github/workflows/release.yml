@@ -48,16 +48,12 @@ jobs:
       - name: Read version file content
         id: read_version_file
         run: |
-          # Use Node.js to read file and output as JSON (most reliable)
-          node -e "
-            const fs = require('fs');
-            const content = fs.readFileSync('${{ steps.find_version.outputs.VERSION_FILE }}', 'utf8');
-            // Output using GitHub's multiline format with unique delimiter
-            const delimiter = 'SIMPLE_RELEASE_BOUNDARY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            console.log('content<<' + delimiter);
-            console.log(content);
-            console.log(delimiter);
-          " >> $GITHUB_OUTPUT
+          # Use a fixed delimiter that definitely won't appear in markdown content
+          DELIMITER="SIMPLE_RELEASE_EOF_1234567890"
+          
+          echo "content<<${DELIMITER}" >> $GITHUB_OUTPUT
+          cat "${{ steps.find_version.outputs.VERSION_FILE }}" >> $GITHUB_OUTPUT
+          echo "${DELIMITER}" >> $GITHUB_OUTPUT
 
       - name: Run basic test
         run: |
