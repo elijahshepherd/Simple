@@ -1,27 +1,41 @@
-# Simple Programming Language - Installation Site
+# Simple Programming Language
 
-This is the installation website for the Simple programming language, deployed on Vercel.
+A beginner-friendly programming language with natural English syntax. Runs on Windows, macOS, and Linux.
 
-## Overview
+## Quick Install
 
-A beautiful, animated installation page for the Simple programming language with:
-- Platform-specific installation cards (Windows, Linux, macOS)
-- Interactive copy-to-clipboard commands
-- Animated fireworks background
-- Ripple animation on first visit
-- Platform-specific install/uninstall commands
-- Dark/light mode support
+### Linux / macOS (one-liner)
+```bash
+curl -fsSL https://raw.githubusercontent.com/elijahshepherd/Simple/main/scripts/install.sh | bash
+```
 
-## Tech Stack
+### Windows (PowerShell one-liner)
+```powershell
+irm https://raw.githubusercontent.com/elijahshepherd/Simple/main/scripts/install.ps1 | iex
+```
 
-- **Framework**: Next.js 14 (App Router)
-- **Styling**: Tailwind CSS with CSS variables
-- **Animations**: Framer Motion
-- **Icons**: Lucide React + Custom SVGs
-- **Deployment**: Vercel (auto-deploys from main branch)
+## What You Get
 
-## Local Development
+- `simple` command available everywhere (added to PATH)
+- Run `.spml` files: `simple run file.spml`
+- Built-in examples: `simple run-example hello`
+- Create new projects: `simple new myproject`
+- Colorful console output, variables, loops, functions
+- File I/O, random, time, math, text operations
+- Cross-platform: Windows, macOS, Linux
 
+## Documentation
+
+- [Installation Guide](https://github.com/elijahshepherd/Simple#installation)
+- [Language Reference](https://github.com/elijahshepherd/Simple/blob/main/docs/LANGUAGE.md)
+- [Examples](https://github.com/elijahshepherd/Simple/tree/main/examples)
+- [Releases](https://github.com/elijahshepherd/Simple/releases)
+
+## Installation Site
+
+The installation website is at **https://simple-lang.vercel.app** (deployed on Vercel).
+
+### Local Development (Installation Site)
 ```bash
 # Install dependencies
 npm install
@@ -36,60 +50,67 @@ npm run build
 npm start
 ```
 
-## Deployment
+### Tech Stack (Installation Site)
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS with CSS variables
+- **Animations**: Framer Motion
+- **Icons**: Lucide React + Custom SVGs
+- **Deployment**: Vercel (auto-deploys from main branch)
 
-This project is deployed on **Vercel** with automatic deployments from the `main` branch.
+## Platform Support
 
-### Live URL
-**https://simple-lang.vercel.app** (Vercel - primary)
-
-### Environment Variables
-No environment variables required for the site itself.
-
-### Platform Support
 | Platform | Install Method | Notes |
 |----------|---------------|-------|
-| Windows | `irm ... simple.exe` | PowerShell install script |
-| Linux | `curl ... | sudo mv` | Binary via curl |
-| macOS | `brew install ...` | Homebrew tap |
+| Windows | `irm ... | iex` | PowerShell install script |
+| Linux | `curl ... | bash` | Shell install script |
+| macOS | `curl ... | bash` | Shell install script |
 
-### Built-in Commands
+## Built-in Commands
+
 After installation, these commands are available:
 - `simple version` - Show version
 - `simple update` - Check for updates
 - `simple uninstall` - Uninstall Simple
 - `simple run <file>` - Run a Simple program
 - `simple run-example <name>` - Run built-in example
+- `simple examples` - List available examples
+- `simple new <name>` - Create a new project scaffold
 
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── page.tsx          # Main installation page
-│   ├── layout.tsx        # Root layout with theme provider
-│   └── globals.css       # Global styles + CSS variables
-├── components/
-│   ├── icons.tsx         # Platform icons (Windows, Linux, macOS)
-│   ├── providers/
-│   │   └── theme-provider.tsx
-│   ├── ui/
-│   │   └── copy-button.tsx
-│   └── magicui/
-│       ├── fireworks.tsx
-│       └── ripple.tsx
-├── lib/
-│   └── utils.ts
-└── components/
-    └── providers/
-        └── theme-provider.tsx
+Simple/
+├── src/                    # Core language implementation (TypeScript)
+│   ├── index.ts           # CLI entry point
+│   ├── lexer.ts           # Tokenizer
+│   ├── parser.ts          # Parser
+│   ├── interpreter.ts     # Interpreter
+│   ├── stdlib.ts          # Standard library
+│   └── errors.ts          # Error handling
+├── bin/                   # Compiled CLI entry point
+├── dist/                  # Compiled JavaScript output
+├── examples/              # Example .spml programs
+├── installer/             # Windows installers (NSIS, C#, PowerShell)
+├── scripts/               # Cross-platform install scripts
+│   ├── install.sh         # Linux/macOS installer
+│   ├── install.ps1        # Windows PowerShell installer
+│   └── uninstall.ps1      # Windows uninstaller
+├── vscode-extension/      # VS Code language support
+├── syntaxes/              # TextMate grammar
+├── docs/                  # Documentation
+│   └── release/           # Release notes
+├── .github/workflows/     # GitHub Actions (CI/CD)
+├── package.json           # Installation site (Next.js)
+├── tsconfig.json          # TypeScript config
+└── CHANGELOG.md           # Changelog
 ```
 
 ## Adding New Versions
 
 1. Create a new markdown file in `docs/release/` with version number (e.g., `1.6.0.md`)
 2. Follow the format in `docs/release/1.5.0.md`
-3. Push to main branch - Vercel will auto-deploy
+3. Push to main branch - Vercel will auto-deploy the installation site
+4. GitHub Actions will build and create a release with binaries
 
 ## License
 
